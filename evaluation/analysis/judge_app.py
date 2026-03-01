@@ -355,7 +355,7 @@ async def index():
             charts.humanPrecisionCategory = new Chart(ctx, {
                 type: 'bar',
                 data: { labels: categories, datasets: datasets },
-                options: { scales: { y: { beginAtZero: true, max: 5.0, title: { display: true, text: 'Score (0-5)' } } } }
+                options: { scales: { y: { beginAtZero: true, max: 1.0, title: { display: true, text: 'Score (0-1)' } } } }
             });
         }
 
@@ -372,7 +372,7 @@ async def index():
             charts.humanRecallCategory = new Chart(ctx, {
                 type: 'bar',
                 data: { labels: categories, datasets: datasets },
-                options: { scales: { y: { beginAtZero: true, max: 5.0, title: { display: true, text: 'Score (0-5)' } } } }
+                options: { scales: { y: { beginAtZero: true, max: 1.0, title: { display: true, text: 'Score (0-1)' } } } }
             });
         }
 
@@ -448,7 +448,7 @@ async def index():
                         { label: 'Completeness (Recall)', data: completeness, backgroundColor: 'rgba(255, 159, 64, 0.6)' }
                     ]
                 },
-                options: { scales: { y: { beginAtZero: true, max: 5.0 } } }
+                options: { scales: { y: { beginAtZero: true, max: 1.0 } } }
             });
         }
 
@@ -758,11 +758,11 @@ async def get_analytics():
         how='left'
     )
     
-    # Scale human scores to 0-1 range (base 5.0)
+    # Scale scores to 0-1 range (base 5.0)
     merged['human_correctness'] = merged['human_correctness'] / 5.0
     merged['human_completeness'] = merged['human_completeness'] / 5.0
     
-    # Fill automated metrics with 0.0 if missing, but leave human scores as NaN where not evaluated
+    # Fill automated metrics with 0.0 if missing, but leave scores as NaN where not evaluated
     # so that the mean() function excludes unjudged rows.
     cols_to_fill = ['keyword_recall', 'semantic_similarity']
     merged[cols_to_fill] = merged[cols_to_fill].fillna(0.0)
