@@ -106,6 +106,7 @@ async def index():
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
     <style>
         body { padding: 20px; background: #f4f7f6; }
         .comparison-row { display: flex; gap: 20px; margin-bottom: 40px; }
@@ -243,21 +244,21 @@ async def index():
                         </div>
                         
                         <div class="row">
-                            <div class="col-md-12">
+                            <div class="col-md-6">
                                 <div class="chart-container">
                                     <h4 class="text-center">Keyword Match by Category</h4>
                                     <canvas id="keywordCategoryChart"></canvas>
                                 </div>
                             </div>
-                        </div>
-
-                        <div class="row">
                             <div class="col-md-6">
                                 <div class="chart-container">
                                     <h4 class="text-center">Overall Automated Metrics</h4>
                                     <canvas id="automatedChart"></canvas>
                                 </div>
                             </div>
+                        </div>
+
+                        <div class="row">
                             <div class="col-md-6">
                                 <div class="chart-container">
                                     <h4 class="text-center">Semantic Similarity by Category</h4>
@@ -282,6 +283,16 @@ async def index():
         let activeTab = 'deck';
         let deckRatingStep = 'correctness';
         
+        Chart.register(ChartDataLabels);
+        Chart.defaults.set('plugins.datalabels', {
+            anchor: 'end',
+            align: 'end',
+            formatter: (v) => (v > 0 ? v.toFixed(2) : ''),
+            font: { size: 10 },
+            color: '#333',
+            clamp: true,
+        });
+
         let charts = {};
 
         marked.setOptions({ breaks: true, gfm: true, headerIds: false, mangle: false });
@@ -387,7 +398,8 @@ async def index():
                         data: [ab_overall.agentic || 0, ab_overall.rag || 0, ab_overall.neither || 0],
                         backgroundColor: ['rgba(75, 192, 192, 0.8)', 'rgba(54, 162, 235, 0.8)', 'rgba(201, 203, 207, 0.8)']
                     }]
-                }
+                },
+                options: { plugins: { datalabels: { display: false } } }
             });
         }
 
@@ -405,11 +417,12 @@ async def index():
                         { label: 'Neither', data: categories.map(c => ab_by_category[c].neither_pct || 0), backgroundColor: 'rgba(201, 203, 207, 0.6)' }
                     ]
                 },
-                options: { 
-                    scales: { 
+                options: {
+                    scales: {
                         y: { stacked: true, beginAtZero: true, max: 100, title: { display: true, text: 'Preference %' } },
                         x: { stacked: true }
-                    } 
+                    },
+                    plugins: { datalabels: { formatter: (v) => (v > 0 ? Math.round(v) + '%' : ''), color: '#fff' } }
                 }
             });
         }
@@ -749,10 +762,21 @@ async def get_analytics():
     
     if not all_analysis: return {}
     df_analysis = pd.DataFrame(all_analysis)
-    
+
+    # Drop human score columns from analysis df if present — they came from results.json
+    # and will conflict with the dedicated merge below, producing _x/_y suffixes.
+    df_analysis = df_analysis.drop(
+        columns=[c for c in ['human_correctness', 'human_completeness', 'human_evaluated'] if c in df_analysis.columns]
+    )
+
+    # Ensure human score columns exist in df_results before selecting them
+    for col in ['human_correctness', 'human_completeness', 'human_evaluated']:
+        if col not in df_results.columns:
+            df_results[col] = np.nan
+
     # Merge human scores
     merged = pd.merge(
-        df_analysis, 
+        df_analysis,
         df_results[['question_id', 'system', 'trial', 'dataset', 'human_correctness', 'human_completeness', 'human_evaluated']],
         on=['question_id', 'system', 'trial', 'dataset'],
         how='left'

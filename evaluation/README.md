@@ -137,7 +137,7 @@ python -m evaluation.runners.run_evaluation \
 
 ## Results
 
-Raw results are in `evaluation/results/results.json`.
+Raw results are in `evaluation/results/results.json`. Automated metrics are in `evaluation/results/accuracy_analysis_all.json` (failed runs excluded from all metrics — see below).
 
 ### Hypothesis outcomes
 
@@ -150,3 +150,18 @@ Raw results are in `evaluation/results/results.json`.
 **H4 — REJECTED**: The **Simplified** toolset (no `get_summary`) performed worst. Removing the peek step forces the agent to either fetch full content speculatively or navigate blind. The `get_summary` call is critical.
 
 **H5 — INCONCLUSIVE**: Injecting summaries into `ls` increased tool calls (7.1 vs 6.4). The richer context invited more exploration of distractor paths, suggesting summaries can act as distractors that lead agents down irrelevant branches.
+
+---
+
+## Automated metric results
+
+Agentic systems had a 27–43% failure rate (agent reached max turns); Hybrid RAG had 0%. Failed runs are excluded from all metrics — both automated and human — so the comparison reflects successful runs only.
+
+| System | Keyword Recall | Semantic Similarity | Failed / Total |
+|---|---|---|---|
+| Hybrid-RAG | 0.683 | 0.759 | 0/80 |
+| Agentic-explicit | 0.564 | 0.778 | 34/80 |
+| Agentic-simplified | 0.550 | 0.782 | 26/80 |
+| Agentic-navigational | 0.517 | 0.747 | 22/80 |
+
+Keyword recall favours RAG — it retrieves more text, which naturally covers more gold-answer keywords. Semantic similarity is effectively tied: agentic-explicit and agentic-simplified slightly exceed RAG, navigational sits just below.

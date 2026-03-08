@@ -49,11 +49,13 @@ def run_accuracy_analysis(results_path: Path, questions_path: Path, output_path:
     model = SentenceTransformer('all-MiniLM-L6-v2')
     
     records = results.get('records', [])
-    print(f"Analyzing {len(records)} records...")
-    
+    failed = [r for r in records if r.get('answer') == 'Could not find answer within step limit.']
+    records = [r for r in records if r.get('answer') != 'Could not find answer within step limit.']
+    print(f"Analyzing {len(records)} records (excluded {len(failed)} failed runs)")
+
     # Group results by system
     system_metrics = {}
-    
+
     for record in records:
         qid = record['question_id']
         gold = questions.get(qid)
