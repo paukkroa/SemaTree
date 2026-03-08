@@ -104,8 +104,10 @@ def build(source: str, output: str, provider: str, model: str | None, max_pages:
 def add(source: str, root_path: str, provider: str, model: str | None, max_pages: int, concurrency: int) -> None:
     """Add a new source to an existing index root directory."""
     from agentic_index.builder import IndexBuilder
+    from agentic_index.composer import add_source
+    from agentic_index.fs_store import FileSystemStore
     from agentic_index.llm import get_provider
-    from agentic_index.fs_store import FileSystemStore, _clean_filename
+    from agentic_index.models import AgenticIndex
 
     root = Path(root_path)
     if not root.exists() or not root.is_dir():
@@ -115,35 +117,28 @@ def add(source: str, root_path: str, provider: str, model: str | None, max_pages
     async def _run() -> None:
         llm = get_provider(provider=provider, model=model)
         click.echo(f"Using LLM provider: {llm}")
-        
-        # Build the index for the new source
-        builder = IndexBuilder(provider=llm)
-        index = await builder.build(source, max_pages=max_pages, concurrency=concurrency)
-        
-        # Determine slug for subdirectory
-        # Use the first source's ID or clean the source string
-        if index.sources:
-            slug = index.sources[0].id
-        else:
-            slug = _clean_filename(source)
-            
-        target_dir = root / slug
-        if target_dir.exists():
-            click.echo(f"Warning: Overwriting existing source at {target_dir}")
-            
-        # Save to the subdirectory using FileSystemStore
-        store = FileSystemStore(target_dir)
-        store.save(index)
-        
-        # Update root summary/metadata (optional but good practice)
-        summary_file = root / "_summary.md"
-        if summary_file.exists():
-            current_summary = summary_file.read_text()
-            if slug not in current_summary:
-                with summary_file.open("a") as f:
-                    f.write(f"\n- **{slug}**: Index for {source}")
 
-        click.echo(f"Source added to {target_dir}")
+        store = FileSystemStore(root)
+
+        # Load existing index (or create empty one for a freshly init'd root)
+        meta_file = root / "_meta.json"
+        if meta_file.exists():
+            try:
+                index = store.load(root)
+            except Exception as e:
+                click.echo(f"Warning: could not load existing index ({e}). Starting fresh.")
+                index = AgenticIndex()
+        else:
+            index = AgenticIndex()
+
+        # Add the new source to the in-memory index
+        builder = IndexBuilder(provider=llm)
+        index = await add_source(index, source, builder=builder)
+
+        # Save the updated index (writes new source files + updates _meta.json)
+        store.save(index)
+
+        click.echo(f"Source '{source}' added to {root}")
         _print_stats(index)
 
     asyncio.run(_run())
@@ -152,16 +147,98 @@ def add(source: str, root_path: str, provider: str, model: str | None, max_pages
 @cli.command()
 @click.argument("source_id")
 @click.argument("index_path", metavar="INDEX")
-def update(source_id: str, index_path: str) -> None:
-    """Re-crawl and update an existing source (Legacy JSON only)."""
-    # TODO: Support filesystem index update
+@click.option(
+    "--provider", default="auto", type=click.Choice(["auto", "ollama", "gemini"]),
+    help="LLM provider for summarization (default: auto-detect).",
+)
+@click.option("--model", default=None, help="Model name override for the LLM provider.")
+@click.option(
+    "--restructure", is_flag=True, default=False,
+    help="Force a full rebuild instead of an incremental update.",
+)
+def update(source_id: str, index_path: str, provider: str, model: str | None, restructure: bool) -> None:
+    """Re-crawl and update an existing source in the index."""
+    from agentic_index.builder import IndexBuilder
     from agentic_index.composer import update_source
+    from agentic_index.fs_store import FileSystemStore
+    from agentic_index.llm import get_provider
 
     async def _run() -> None:
-        index = AgenticIndex.load(index_path)
-        index = await update_source(index, source_id)
-        index.save(index_path)
+        llm = get_provider(provider=provider, model=model)
+        click.echo(f"Using LLM provider: {llm}")
+        builder = IndexBuilder(provider=llm)
+
+        if Path(index_path).is_dir():
+            store = FileSystemStore(index_path)
+            index = store.load(index_path)
+            index = await update_source(
+                index, source_id, builder=builder, incremental=not restructure
+            )
+            store.save(index)
+        else:
+            index = AgenticIndex.load(index_path)
+            index = await update_source(
+                index, source_id, builder=builder, incremental=not restructure
+            )
+            index.save(index_path)
+
         click.echo(f"Source '{source_id}' updated. Index saved to {index_path}")
+        _print_stats(index)
+
+    asyncio.run(_run())
+
+
+@cli.command("build-multi")
+@click.argument("sources", nargs=-1, required=True)
+@click.option("-o", "--output", default="index_root", help="Output path (directory).")
+@click.option(
+    "--structure-mode", default="source",
+    type=click.Choice(["source", "semantic"]),
+    help="'source' (default) keeps each source as its own subtree. "
+         "'semantic' merges all pages into one cross-source hierarchy.",
+)
+@click.option(
+    "--provider", default="auto", type=click.Choice(["auto", "ollama", "gemini"]),
+    help="LLM provider for summarization (default: auto-detect).",
+)
+@click.option("--model", default=None, help="Model name override for the LLM provider.")
+@click.option("--max-pages", default=200, help="Maximum pages per source.")
+@click.option("--concurrency", default=10, help="Concurrent requests per source (web only).")
+def build_multi(
+    sources: tuple[str, ...],
+    output: str,
+    structure_mode: str,
+    provider: str,
+    model: str | None,
+    max_pages: int,
+    concurrency: int,
+) -> None:
+    """Build an index from multiple sources with optional semantic grouping.
+
+    SOURCES can be URLs or local paths. Example:
+
+    \b
+        agentic-index build-multi ./docs/technical ./docs/hr \\
+            --structure-mode semantic -o /tmp/combined_idx
+    """
+    from agentic_index.builder import IndexBuilder
+    from agentic_index.fs_store import FileSystemStore
+    from agentic_index.llm import get_provider
+
+    async def _run() -> None:
+        llm = get_provider(provider=provider, model=model)
+        click.echo(f"Using LLM provider: {llm}")
+        builder = IndexBuilder(provider=llm)
+        index = await builder.build_multi(
+            list(sources),
+            structure_mode=structure_mode,
+            max_pages=max_pages,
+            concurrency=concurrency,
+        )
+
+        store = FileSystemStore(output)
+        store.save(index)
+        click.echo(f"Index saved to directory: {output}")
         _print_stats(index)
 
     asyncio.run(_run())

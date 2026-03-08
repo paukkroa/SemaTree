@@ -90,41 +90,52 @@ def get_summary(path: str) -> str:
 @mcp.tool()
 async def get_details(path: str) -> str:
     """Retrieve the full, live content of a documentation page.
-    
+
     Args:
         path: The internal path to the document (e.g. '/source/doc.md'). Must start with '/'.
               CRITICAL: Only use a path if it was explicitly listed in a previous 'ls' call.
-              
+
     Returns: The complete, latest content of the page converted to Markdown.
-    ALWAYS use this when you need specific technical details, code examples, or 
+    ALWAYS use this when you need specific technical details, code examples, or
     step-by-step instructions.
     """
     store = _get_store()
     local_content = store.read_file(path)
-    
-    # Parse frontmatter to find 'ref'
-    match = re.search(r"^ref: (.+)$", local_content, re.MULTILINE)
-    if not match:
-        return f"Error: No 'ref' (URL) found in metadata for '{path}'."
-    
-    url = match.group(1).strip()
-    
-    # Simple filesystem cache
+
+    # Parse frontmatter to find 'ref' and 'ref_type'
+    ref_match = re.search(r"^ref: (.+)$", local_content, re.MULTILINE)
+    if not ref_match:
+        return f"Error: No 'ref' found in metadata for '{path}'."
+
+    ref = ref_match.group(1).strip()
+
+    ref_type_match = re.search(r"^ref_type: (.+)$", local_content, re.MULTILINE)
+    ref_type = ref_type_match.group(1).strip() if ref_type_match else "url"
+
+    # Local file: read directly from filesystem
+    if ref_type == "file":
+        try:
+            content = Path(ref).read_text(encoding="utf-8")
+            if len(content) > MAX_CONTENT_LENGTH:
+                content = content[:MAX_CONTENT_LENGTH] + "\n\n... [truncated]"
+            return f"Local file content for '{path}' ({ref}):\n\n{content}"
+        except Exception as e:
+            return f"Error reading local file {ref}: {e}"
+
+    # URL: HTTP fetch with caching
+    url = ref
     cache_dir = Path(".cache/full_content")
     cache_dir.mkdir(parents=True, exist_ok=True)
-    
-    # Create a slug-like filename from path
+
     cache_name = path.strip("/").replace("/", "-")
     if cache_name.endswith(".md"):
         cache_name = cache_name[:-3]
     cache_file = cache_dir / f"{cache_name}.md"
-    
+
     if cache_file.exists():
         return f"Live content for '{path}' ({url}) [cached]:\n\n" + cache_file.read_text(encoding="utf-8")
 
-    headers = {
-        "User-Agent": "AgenticIndex/0.1"
-    }
+    headers = {"User-Agent": "AgenticIndex/0.1"}
     try:
         async with httpx.AsyncClient(follow_redirects=True, timeout=30.0, headers=headers) as client:
             resp = await client.get(url)
@@ -133,7 +144,7 @@ async def get_details(path: str) -> str:
     except Exception as e:
         return f"Error fetching live content from {url}: {e}"
 
-    # Simple HTML cleanup (optional, similar to original)
+    # Simple HTML cleanup
     if "<html" in content[:500].lower():
         try:
             from bs4 import BeautifulSoup
@@ -146,8 +157,7 @@ async def get_details(path: str) -> str:
         except ImportError:
             pass
 
-    if cache_file:
-        cache_file.write_text(content, encoding="utf-8")
+    cache_file.write_text(content, encoding="utf-8")
 
     if len(content) > MAX_CONTENT_LENGTH:
         content = content[:MAX_CONTENT_LENGTH] + "\n\n... [truncated]"

@@ -29,6 +29,7 @@ class IndexNode(BaseModel):
     ref: str | None = Field(default=None, description="URL or file path (null for grouping nodes)")
     ref_type: RefType | None = Field(default=None, description="Type of reference")
     source_id: str | None = Field(default=None, description="ID of the source this belongs to")
+    content_hash: str | None = Field(default=None, description="SHA-256 of original page content")
     children: list[IndexNode] = Field(default_factory=list)
 
     @property

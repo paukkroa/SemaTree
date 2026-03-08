@@ -113,6 +113,17 @@ class Summarizer:
         else:
             summary, nav_summary = await self._summarize_branch(node.title, children)
 
+        # Per-leaf source_id override (used by CrossSourceStructurer)
+        effective_source_id = source_id
+        if node.is_leaf and node.page and "original_source_id" in node.page.metadata:
+            effective_source_id = node.page.metadata["original_source_id"]
+
+        # Compute content hash for leaf nodes
+        content_hash: str | None = None
+        if node.is_leaf and node.page and node.page.content:
+            import hashlib
+            content_hash = hashlib.sha256(node.page.content.encode()).hexdigest()
+
         return IndexNode(
             id=node_id,
             title=node.title,
@@ -120,7 +131,8 @@ class Summarizer:
             nav_summary=nav_summary,
             ref=node.ref,
             ref_type=node.ref_type,
-            source_id=source_id,
+            source_id=effective_source_id,
+            content_hash=content_hash,
             children=children,
         )
 

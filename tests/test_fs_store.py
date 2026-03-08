@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from agentic_index.fs_store import FileSystemStore, _clean_filename
+from agentic_index.fs_store import FileSystemStore, _clean_filename, _parse_fm_field
 from agentic_index.models import AgenticIndex, IndexNode, RefType, Source, SourceType
 
 
@@ -221,3 +221,185 @@ class TestFileSystemStoreFind:
     def test_find_includes_directories(self, populated_store):
         result = populated_store.find("getting-started")
         assert "getting-started" in result
+
+
+class TestParseFmField:
+    def test_plain_value(self):
+        fm = "id: 0.0.1\nref: https://example.com"
+        assert _parse_fm_field(fm, "id") == "0.0.1"
+
+    def test_quoted_value(self):
+        fm = 'title: "My Title"'
+        assert _parse_fm_field(fm, "title", unquote=True) == "My Title"
+
+    def test_missing_field(self):
+        assert _parse_fm_field("id: 1", "title") == ""
+
+    def test_url_field_with_colon(self):
+        fm = "ref: https://example.com/path"
+        assert _parse_fm_field(fm, "ref") == "https://example.com/path"
+
+
+class TestFileSystemStoreLoad:
+    """Round-trip tests: save() → load() produces equivalent AgenticIndex."""
+
+    @pytest.fixture
+    def saved_store(self, tmp_path) -> tuple[FileSystemStore, AgenticIndex]:
+        store = FileSystemStore(tmp_path / "index")
+        index = _make_index()
+        store.save(index)
+        return store, index
+
+    def test_load_returns_agenticindex(self, saved_store):
+        store, _ = saved_store
+        loaded = FileSystemStore.load(store.root)
+        assert isinstance(loaded, AgenticIndex)
+
+    def test_load_preserves_version(self, saved_store):
+        store, original = saved_store
+        loaded = FileSystemStore.load(store.root)
+        assert loaded.version == original.version
+
+    def test_load_preserves_sources(self, saved_store):
+        store, original = saved_store
+        loaded = FileSystemStore.load(store.root)
+        assert len(loaded.sources) == len(original.sources)
+        assert loaded.sources[0].id == "test-src"
+        assert loaded.sources[0].origin == "https://example.com"
+        assert loaded.sources[0].page_count == 3
+
+    def test_load_preserves_source_type(self, saved_store):
+        store, _ = saved_store
+        loaded = FileSystemStore.load(store.root)
+        assert loaded.sources[0].type == SourceType.website
+
+    def test_load_reconstructs_root(self, saved_store):
+        store, _ = saved_store
+        loaded = FileSystemStore.load(store.root)
+        assert loaded.root.id == "0"
+        assert loaded.root.title == "Root"
+
+    def test_load_reconstructs_leaf_ref(self, saved_store):
+        store, _ = saved_store
+        loaded = FileSystemStore.load(store.root)
+        leaves = loaded.root.all_leaves()
+        refs = {leaf.ref for leaf in leaves}
+        assert "https://example.com/install" in refs
+        assert "https://example.com/quickstart" in refs
+
+    def test_load_reconstructs_leaf_ref_type(self, saved_store):
+        store, _ = saved_store
+        loaded = FileSystemStore.load(store.root)
+        leaves = loaded.root.all_leaves()
+        for leaf in leaves:
+            if leaf.ref:
+                assert leaf.ref_type == RefType.url
+
+    def test_load_reconstructs_leaf_source_id(self, saved_store):
+        store, _ = saved_store
+        loaded = FileSystemStore.load(store.root)
+        leaves = loaded.root.all_leaves()
+        for leaf in leaves:
+            assert leaf.source_id == "test-src"
+
+    def test_load_reconstructs_nav_summary(self, saved_store):
+        store, _ = saved_store
+        loaded = FileSystemStore.load(store.root)
+        leaves = loaded.root.all_leaves()
+        nav_summaries = {leaf.nav_summary for leaf in leaves}
+        assert "Install via pip or uv" in nav_summaries
+
+    def test_load_reconstructs_branch_nav_summary(self, saved_store):
+        store, _ = saved_store
+        loaded = FileSystemStore.load(store.root)
+        # "Getting Started" branch should have its nav_summary
+        branches = [c for c in loaded.root.children if not c.is_leaf]
+        assert any("Install and configure" in b.nav_summary for b in branches)
+
+    def test_load_preserves_leaf_count(self, saved_store):
+        store, original = saved_store
+        loaded = FileSystemStore.load(store.root)
+        assert loaded.root.count_leaves() == original.root.count_leaves()
+
+    def test_load_preserves_node_count(self, saved_store):
+        store, original = saved_store
+        loaded = FileSystemStore.load(store.root)
+        # Node count should match (root + branches + leaves)
+        assert loaded.root.count_nodes() == original.root.count_nodes()
+
+    def test_load_meta_json_sources_serialization(self, tmp_path):
+        """_meta.json must contain the sources list."""
+        import json
+
+        store = FileSystemStore(tmp_path / "index")
+        index = _make_index()
+        store.save(index)
+
+        meta = json.loads((store.root / "_meta.json").read_text())
+        assert "sources" in meta
+        assert len(meta["sources"]) == 1
+        src = meta["sources"][0]
+        assert src["id"] == "test-src"
+        assert src["type"] == "website"
+        assert src["origin"] == "https://example.com"
+        assert src["page_count"] == 3
+
+    def test_load_missing_meta_raises(self, tmp_path):
+        store = FileSystemStore(tmp_path / "no_index")
+        with pytest.raises(FileNotFoundError):
+            FileSystemStore.load(store.root)
+
+    def test_roundtrip_local_file_ref_type(self, tmp_path):
+        """Leaf with ref_type=file round-trips correctly."""
+        store = FileSystemStore(tmp_path / "local_index")
+        index = AgenticIndex(
+            sources=[Source(id="local-src", type=SourceType.local_folder, origin="/docs")],
+            root=IndexNode(
+                id="0",
+                title="Root",
+                children=[
+                    IndexNode(
+                        id="0.0",
+                        title="README",
+                        summary="The readme.",
+                        nav_summary="Readme file",
+                        ref="/docs/README.md",
+                        ref_type=RefType.file,
+                        source_id="local-src",
+                    )
+                ],
+            ),
+        )
+        store.save(index)
+        loaded = FileSystemStore.load(store.root)
+        leaf = loaded.root.all_leaves()[0]
+        assert leaf.ref_type == RefType.file
+        assert leaf.ref == "/docs/README.md"
+        assert leaf.source_id == "local-src"
+
+    def test_roundtrip_content_hash(self, tmp_path):
+        """content_hash field round-trips through save/load."""
+        store = FileSystemStore(tmp_path / "hash_index")
+        index = AgenticIndex(
+            sources=[Source(id="s", type=SourceType.website, origin="https://x.com")],
+            root=IndexNode(
+                id="0",
+                title="Root",
+                children=[
+                    IndexNode(
+                        id="0.0",
+                        title="Doc",
+                        summary="A doc.",
+                        nav_summary="A doc",
+                        ref="https://x.com/doc",
+                        ref_type=RefType.url,
+                        source_id="s",
+                        content_hash="abc123",
+                    )
+                ],
+            ),
+        )
+        store.save(index)
+        loaded = FileSystemStore.load(store.root)
+        leaf = loaded.root.all_leaves()[0]
+        assert leaf.content_hash == "abc123"

@@ -70,8 +70,21 @@ async def update_source(
     index: AgenticIndex,
     source_id: str,
     builder: IndexBuilder | None = None,
+    incremental: bool = True,
 ) -> AgenticIndex:
-    """Re-crawl and rebuild a source within the index."""
+    """Re-crawl and rebuild (or incrementally update) a source within the index.
+
+    Args:
+        index: The current AgenticIndex.
+        source_id: ID of the source to update.
+        builder: Optional IndexBuilder (created with default provider if omitted).
+        incremental: When True, use change detection to only re-process changed
+            pages (default).  When False, perform a full rebuild.
+    """
+    from agentic_index.crawlers.local import LocalCrawler
+    from agentic_index.crawlers.web import WebCrawler
+    from agentic_index.models import SourceType
+
     builder = builder or IndexBuilder()
 
     # Find existing source
@@ -90,20 +103,49 @@ async def update_source(
         raise ValueError(f"Source tree not found in index: {source_id}")
 
     id_prefix = f"0.{child_idx}"
-    logger.info("Updating source %s at prefix %s", source_id, id_prefix)
+    logger.info("Updating source %s at prefix %s (incremental=%s)", source_id, id_prefix, incremental)
 
-    new_tree, new_meta, page_count = await builder.build_source_tree(
-        source_meta.origin, source_id, source_meta.type, id_prefix
-    )
+    if incremental:
+        # Crawl to get fresh pages
+        if source_meta.type == SourceType.website:
+            crawler = WebCrawler(url=source_meta.origin)
+        else:
+            crawler = LocalCrawler(path=source_meta.origin)
+        new_pages = await crawler.crawl()
+        if not new_pages:
+            raise ValueError(f"No pages found at {source_meta.origin}")
 
-    # Replace source metadata
-    for i, s in enumerate(index.sources):
-        if s.id == source_id:
-            index.sources[i] = new_meta
-            break
+        from agentic_index.updater import IncrementalUpdater
+        updater = IncrementalUpdater()
+        diff = await updater.compute_diff(index, new_pages)
 
-    # Replace source tree
-    index.root.children[child_idx] = new_tree
+        if not diff.has_changes:
+            logger.info("No changes detected for source %s — skipping update", source_id)
+            return index
+
+        index = await updater.apply_diff(index, diff, source_id=source_id, builder=builder)
+
+        # Update source metadata
+        from datetime import datetime, timezone
+        for i, s in enumerate(index.sources):
+            if s.id == source_id:
+                index.sources[i] = index.sources[i].model_copy(update={
+                    "crawled_at": datetime.now(timezone.utc),
+                    "page_count": len(new_pages),
+                })
+                break
+    else:
+        # Full rebuild
+        new_tree, new_meta, page_count = await builder.build_source_tree(
+            source_meta.origin, source_id, source_meta.type, id_prefix
+        )
+
+        for i, s in enumerate(index.sources):
+            if s.id == source_id:
+                index.sources[i] = new_meta
+                break
+
+        index.root.children[child_idx] = new_tree
 
     # Regenerate root summary
     summarizer = Summarizer(provider=builder._provider)
