@@ -10,6 +10,7 @@ from pathlib import Path
 
 import click
 
+from agentic_index.llm import PROVIDER_NAMES
 from agentic_index.models import AgenticIndex
 
 
@@ -58,7 +59,7 @@ def init(path: str) -> None:
 @click.argument("source")
 @click.option("-o", "--output", default="index_root", help="Output path (directory for file tree, .json for legacy file).")
 @click.option(
-    "--provider", default="auto", type=click.Choice(["auto", "ollama", "gemini"]),
+    "--provider", default="auto", type=click.Choice(PROVIDER_NAMES),
     help="LLM provider for summarization (default: auto-detect).",
 )
 @click.option("--model", default=None, help="Model name override for the LLM provider.")
@@ -95,7 +96,7 @@ def build(source: str, output: str, provider: str, model: str | None, max_pages:
 @click.argument("source")
 @click.argument("root_path", metavar="ROOT_PATH")
 @click.option(
-    "--provider", default="auto", type=click.Choice(["auto", "ollama", "gemini"]),
+    "--provider", default="auto", type=click.Choice(PROVIDER_NAMES),
     help="LLM provider for summarization.",
 )
 @click.option("--model", default=None, help="Model name override.")
@@ -148,7 +149,7 @@ def add(source: str, root_path: str, provider: str, model: str | None, max_pages
 @click.argument("source_id")
 @click.argument("index_path", metavar="INDEX")
 @click.option(
-    "--provider", default="auto", type=click.Choice(["auto", "ollama", "gemini"]),
+    "--provider", default="auto", type=click.Choice(PROVIDER_NAMES),
     help="LLM provider for summarization (default: auto-detect).",
 )
 @click.option("--model", default=None, help="Model name override for the LLM provider.")
@@ -198,7 +199,7 @@ def update(source_id: str, index_path: str, provider: str, model: str | None, re
          "'semantic' merges all pages into one cross-source hierarchy.",
 )
 @click.option(
-    "--provider", default="auto", type=click.Choice(["auto", "ollama", "gemini"]),
+    "--provider", default="auto", type=click.Choice(PROVIDER_NAMES),
     help="LLM provider for summarization (default: auto-detect).",
 )
 @click.option("--model", default=None, help="Model name override for the LLM provider.")
@@ -334,7 +335,7 @@ def search_cmd(query: str, index_path: str, max_results: int) -> None:
 @cli.command()
 @click.argument("index_path", metavar="INDEX")
 @click.option(
-    "--provider", default="auto", type=click.Choice(["auto", "ollama", "gemini"]),
+    "--provider", default="auto", type=click.Choice(PROVIDER_NAMES),
     help="LLM provider for the chat agent.",
 )
 @click.option("--model", default=None, help="Model name override.")

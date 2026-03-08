@@ -1,4 +1,4 @@
-"""LLM provider abstraction supporting Gemini and Ollama."""
+"""LLM provider abstraction supporting Gemini, Ollama, and more."""
 
 from __future__ import annotations
 
@@ -15,6 +15,17 @@ logger = logging.getLogger(__name__)
 # Default models per provider
 OLLAMA_DEFAULT_MODEL = "llama3.2"
 GEMINI_DEFAULT_MODEL = "gemini-3-flash-preview"
+OPENAI_DEFAULT_MODEL = "gpt-4o-mini"
+ANTHROPIC_DEFAULT_MODEL = "claude-haiku-4-5-20251001"
+OPENROUTER_DEFAULT_MODEL = "openai/gpt-4o-mini"
+LITELLM_DEFAULT_MODEL = "gpt-4o-mini"
+HUGGINGFACE_DEFAULT_MODEL = "meta-llama/Meta-Llama-3-8B-Instruct"
+LLAMACPP_DEFAULT_BASE_URL = "http://localhost:8080"
+
+PROVIDER_NAMES = [
+    "auto", "ollama", "gemini", "openai", "anthropic",
+    "openrouter", "litellm", "huggingface", "llamacpp",
+]
 
 
 @dataclass
@@ -200,6 +211,282 @@ class GeminiProvider(LLMProvider):
         return f"GeminiProvider(model={self.model!r})"
 
 
+class OpenAIProvider(LLMProvider):
+    """LLM provider using the OpenAI API."""
+
+    def __init__(self, model: str = OPENAI_DEFAULT_MODEL, api_key: str | None = None):
+        self.model = model
+        self._api_key = api_key or os.environ.get("OPENAI_API_KEY", "")
+        if not self._api_key:
+            raise ValueError("OpenAI API key required. Set OPENAI_API_KEY env var or pass api_key.")
+
+    async def generate(
+        self,
+        user_message: str,
+        system: str = "",
+        max_tokens: int = 256,
+        temperature: float = 0.0,
+    ) -> LLMResponse:
+        try:
+            import openai
+        except ImportError:
+            raise RuntimeError("openai package not installed. Run: pip install 'agentic-index[providers]'")
+
+        client = openai.AsyncOpenAI(api_key=self._api_key)
+        messages = []
+        if system:
+            messages.append({"role": "system", "content": system})
+        messages.append({"role": "user", "content": user_message})
+
+        response = await client.chat.completions.create(
+            model=self.model,
+            messages=messages,
+            max_tokens=max_tokens,
+            temperature=temperature,
+        )
+        text = response.choices[0].message.content or ""
+        return LLMResponse(
+            text=text.strip(),
+            input_tokens=response.usage.prompt_tokens if response.usage else 0,
+            output_tokens=response.usage.completion_tokens if response.usage else 0,
+        )
+
+    def __repr__(self) -> str:
+        return f"OpenAIProvider(model={self.model!r})"
+
+
+class AnthropicProvider(LLMProvider):
+    """LLM provider using the Anthropic API."""
+
+    def __init__(self, model: str = ANTHROPIC_DEFAULT_MODEL, api_key: str | None = None):
+        self.model = model
+        self._api_key = api_key or os.environ.get("ANTHROPIC_API_KEY", "")
+        if not self._api_key:
+            raise ValueError("Anthropic API key required. Set ANTHROPIC_API_KEY env var or pass api_key.")
+
+    async def generate(
+        self,
+        user_message: str,
+        system: str = "",
+        max_tokens: int = 256,
+        temperature: float = 0.0,
+    ) -> LLMResponse:
+        try:
+            import anthropic
+        except ImportError:
+            raise RuntimeError("anthropic package not installed. Run: pip install 'agentic-index[providers]'")
+
+        client = anthropic.AsyncAnthropic(api_key=self._api_key)
+        kwargs: dict = {
+            "model": self.model,
+            "max_tokens": max_tokens,
+            "temperature": temperature,
+            "messages": [{"role": "user", "content": user_message}],
+        }
+        if system:
+            kwargs["system"] = system
+
+        response = await client.messages.create(**kwargs)
+        text = response.content[0].text if response.content else ""
+        return LLMResponse(
+            text=text.strip(),
+            input_tokens=response.usage.input_tokens if response.usage else 0,
+            output_tokens=response.usage.output_tokens if response.usage else 0,
+        )
+
+    def __repr__(self) -> str:
+        return f"AnthropicProvider(model={self.model!r})"
+
+
+class OpenRouterProvider(LLMProvider):
+    """LLM provider using OpenRouter (OpenAI-compatible API)."""
+
+    def __init__(self, model: str = OPENROUTER_DEFAULT_MODEL, api_key: str | None = None):
+        self.model = model
+        self._api_key = api_key or os.environ.get("OPENROUTER_API_KEY", "")
+        if not self._api_key:
+            raise ValueError("OpenRouter API key required. Set OPENROUTER_API_KEY env var or pass api_key.")
+
+    async def generate(
+        self,
+        user_message: str,
+        system: str = "",
+        max_tokens: int = 256,
+        temperature: float = 0.0,
+    ) -> LLMResponse:
+        try:
+            import openai
+        except ImportError:
+            raise RuntimeError("openai package not installed. Run: pip install 'agentic-index[providers]'")
+
+        client = openai.AsyncOpenAI(
+            api_key=self._api_key,
+            base_url="https://openrouter.ai/api/v1",
+            default_headers={
+                "HTTP-Referer": "https://github.com/agentic-index",
+                "X-Title": "Agentic Index",
+            },
+        )
+        messages = []
+        if system:
+            messages.append({"role": "system", "content": system})
+        messages.append({"role": "user", "content": user_message})
+
+        response = await client.chat.completions.create(
+            model=self.model,
+            messages=messages,
+            max_tokens=max_tokens,
+            temperature=temperature,
+        )
+        text = response.choices[0].message.content or ""
+        return LLMResponse(
+            text=text.strip(),
+            input_tokens=response.usage.prompt_tokens if response.usage else 0,
+            output_tokens=response.usage.completion_tokens if response.usage else 0,
+        )
+
+    def __repr__(self) -> str:
+        return f"OpenRouterProvider(model={self.model!r})"
+
+
+class LiteLLMProvider(LLMProvider):
+    """LLM provider using LiteLLM (supports 100+ models via unified interface)."""
+
+    def __init__(self, model: str = LITELLM_DEFAULT_MODEL):
+        self.model = model
+
+    async def generate(
+        self,
+        user_message: str,
+        system: str = "",
+        max_tokens: int = 256,
+        temperature: float = 0.0,
+    ) -> LLMResponse:
+        try:
+            import litellm
+        except ImportError:
+            raise RuntimeError("litellm package not installed. Run: pip install 'agentic-index[providers]'")
+
+        messages = []
+        if system:
+            messages.append({"role": "system", "content": system})
+        messages.append({"role": "user", "content": user_message})
+
+        response = await litellm.acompletion(
+            model=self.model,
+            messages=messages,
+            max_tokens=max_tokens,
+            temperature=temperature,
+        )
+        text = response.choices[0].message.content or ""
+        return LLMResponse(
+            text=text.strip(),
+            input_tokens=response.usage.prompt_tokens if response.usage else 0,
+            output_tokens=response.usage.completion_tokens if response.usage else 0,
+        )
+
+    def __repr__(self) -> str:
+        return f"LiteLLMProvider(model={self.model!r})"
+
+
+class HuggingFaceProvider(LLMProvider):
+    """LLM provider using HuggingFace Inference API."""
+
+    def __init__(self, model: str = HUGGINGFACE_DEFAULT_MODEL, api_key: str | None = None):
+        self.model = model
+        self._api_key = (
+            api_key
+            or os.environ.get("HF_TOKEN", "")
+            or os.environ.get("HUGGINGFACE_API_KEY", "")
+        )
+        if not self._api_key:
+            raise ValueError(
+                "HuggingFace API token required. Set HF_TOKEN env var or pass api_key."
+            )
+
+    async def generate(
+        self,
+        user_message: str,
+        system: str = "",
+        max_tokens: int = 256,
+        temperature: float = 0.0,
+    ) -> LLMResponse:
+        try:
+            from huggingface_hub import AsyncInferenceClient
+        except ImportError:
+            raise RuntimeError("huggingface_hub package not installed. Run: pip install 'agentic-index[providers]'")
+
+        client = AsyncInferenceClient(model=self.model, token=self._api_key)
+        messages = []
+        if system:
+            messages.append({"role": "system", "content": system})
+        messages.append({"role": "user", "content": user_message})
+
+        response = await client.chat_completion(
+            messages=messages,
+            max_tokens=max_tokens,
+            temperature=temperature,
+        )
+        text = response.choices[0].message.content or "" if response.choices else ""
+        input_tokens = 0
+        output_tokens = 0
+        if hasattr(response, "usage") and response.usage:
+            input_tokens = getattr(response.usage, "prompt_tokens", 0) or 0
+            output_tokens = getattr(response.usage, "completion_tokens", 0) or 0
+        return LLMResponse(
+            text=text.strip(),
+            input_tokens=input_tokens,
+            output_tokens=output_tokens,
+        )
+
+    def __repr__(self) -> str:
+        return f"HuggingFaceProvider(model={self.model!r})"
+
+
+class LlamaCppProvider(LLMProvider):
+    """LLM provider using a local llama.cpp server (OpenAI-compatible API)."""
+
+    def __init__(self, model: str | None = None, base_url: str = LLAMACPP_DEFAULT_BASE_URL):
+        self.model = model
+        self.base_url = base_url.rstrip("/")
+
+    async def generate(
+        self,
+        user_message: str,
+        system: str = "",
+        max_tokens: int = 256,
+        temperature: float = 0.0,
+    ) -> LLMResponse:
+        messages = []
+        if system:
+            messages.append({"role": "system", "content": system})
+        messages.append({"role": "user", "content": user_message})
+
+        payload: dict = {
+            "messages": messages,
+            "max_tokens": max_tokens,
+            "temperature": temperature,
+        }
+        if self.model:
+            payload["model"] = self.model
+
+        async with httpx.AsyncClient(timeout=300.0) as client:
+            resp = await client.post(f"{self.base_url}/v1/chat/completions", json=payload)
+            resp.raise_for_status()
+            data = resp.json()
+
+        text = data["choices"][0]["message"]["content"] if data.get("choices") else ""
+        usage = data.get("usage", {})
+        return LLMResponse(
+            text=text.strip(),
+            input_tokens=usage.get("prompt_tokens", 0),
+            output_tokens=usage.get("completion_tokens", 0),
+        )
+
+    def __repr__(self) -> str:
+        return f"LlamaCppProvider(base_url={self.base_url!r})"
+
+
 async def _check_ollama(base_url: str = "http://localhost:11434") -> bool:
     """Check if Ollama is running locally."""
     try:
@@ -214,13 +501,15 @@ def get_provider(
     provider: str = "auto",
     model: str | None = None,
     api_key: str | None = None,
+    base_url: str | None = None,
 ) -> LLMProvider:
     """Get an LLM provider instance.
 
     Args:
-        provider: "ollama", "gemini", or "auto" (tries Ollama first, then Gemini).
+        provider: One of PROVIDER_NAMES. "auto" tries Ollama first, then Gemini.
         model: Model name override.
-        api_key: API key for Gemini.
+        api_key: API key (used by cloud providers).
+        base_url: Base URL override (used by llamacpp).
     """
     if provider == "ollama":
         return OllamaProvider(model=model or OLLAMA_DEFAULT_MODEL)
@@ -228,11 +517,29 @@ def get_provider(
     if provider == "gemini":
         return GeminiProvider(model=model or GEMINI_DEFAULT_MODEL, api_key=api_key)
 
+    if provider == "openai":
+        return OpenAIProvider(model=model or OPENAI_DEFAULT_MODEL, api_key=api_key)
+
+    if provider == "anthropic":
+        return AnthropicProvider(model=model or ANTHROPIC_DEFAULT_MODEL, api_key=api_key)
+
+    if provider == "openrouter":
+        return OpenRouterProvider(model=model or OPENROUTER_DEFAULT_MODEL, api_key=api_key)
+
+    if provider == "litellm":
+        return LiteLLMProvider(model=model or LITELLM_DEFAULT_MODEL)
+
+    if provider == "huggingface":
+        return HuggingFaceProvider(model=model or HUGGINGFACE_DEFAULT_MODEL, api_key=api_key)
+
+    if provider == "llamacpp":
+        return LlamaCppProvider(
+            model=model,
+            base_url=base_url or os.environ.get("LLAMACPP_BASE_URL", LLAMACPP_DEFAULT_BASE_URL),
+        )
+
     # Auto: prefer Ollama if available, else Gemini
     if provider == "auto":
-        # Synchronous check for Ollama
-        import asyncio
-
         try:
             loop = asyncio.get_running_loop()
         except RuntimeError:

@@ -24,6 +24,12 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+providers = [
+    "openai>=1.0",
+    "anthropic>=0.40",
+    "litellm>=1.40",
+    "huggingface_hub>=0.24",
+]
 eval = [
     "chromadb>=0.5",
     "sentence-transformers>=3.0",
