@@ -1,4 +1,0 @@
-<!-- nav_summary: Customize UI: Status bar & keyboard shortcuts -->
-The **Interface & UI Customization** section provides in-depth guidance on personalizing the visual and interactive elements of Claude Code to enhance workflow efficiency and user comfort. Users can tailor the **real-time status bar** via shell scripts, enabling dynamic updates for system metrics, project statuses, or custom notifications. Additionally, the **keyboard shortcut customization** subsystem allows for deep customization of default keybindings through a structured JSON configuration file (`~/`), empowering users to optimize navigation, editing, and tool integration with intuitive, context-specific shortcuts. This section bridges technical flexibility with usability, ensuring the interface adapts seamlessly to individual preferences and advanced use cases.
-
----

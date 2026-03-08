@@ -14,7 +14,15 @@ from agentic_index.fs_store import FileSystemStore
 
 MAX_CONTENT_LENGTH = 8000
 
-mcp = FastMCP("agentic-index")
+mcp = FastMCP(
+    "agentic-index",
+    instructions=(
+        "AgentIndex Explicit Toolset: use ls() to browse the index by name, "
+        "get_summary() to peek at a node before committing to it, "
+        "find() to search by keyword or pattern, and "
+        "get_details() to fetch the full live content of a document."
+    ),
+)
 
 _store: FileSystemStore | None = None
 

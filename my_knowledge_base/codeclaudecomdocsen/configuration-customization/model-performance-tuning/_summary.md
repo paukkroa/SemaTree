@@ -1,2 +1,0 @@
-<!-- nav_summary: Optimize AI models & response speed settings -->
-This section covers **Model & Performance Tuning**, detailing how to optimize AI model behavior through configurable settings, dynamic switching via aliases or names, and performance adjustments. It includes guidance on restricting model capabilities, enabling faster response modes (e.g., Opus 4.6 via `/fast`), and fine-tuning for efficiency without sacrificing accuracy.

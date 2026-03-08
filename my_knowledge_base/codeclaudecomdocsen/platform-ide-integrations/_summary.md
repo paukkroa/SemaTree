@@ -1,4 +1,0 @@
-<!-- nav_summary: AI integrations for coding, IDEs, and workflow automation -->
-The **Platform & IDE Integrations** section provides a comprehensive overview of how Claude Code integrates with a diverse range of development environments, tools, and workflows to enhance productivity through AI-driven automation and collaboration. It covers browser-based coding and real-time collaboration via Claude Code on the web, browser extensions like the Chrome beta for CLI/VS Code task automation, deep IDE integrations for JetBrains (IntelliJ, PyCharm, etc.) and VS Code (installation, configuration, and extensions), as well as CI/CD pipeline automation in GitHub Actions and GitLab CI/CD. Additionally, it explores Slack integration for AI-assisted coding within team communication platforms, ensuring seamless AI assistance across coding, debugging, and workflow orchestration.
-
----

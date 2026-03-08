@@ -1,2 +1,0 @@
-<!-- nav_summary: Customize, optimize, and automate Claude Code workflows -->
-The **Core Concepts & Architecture** section provides a foundational overview of Claude Code’s extensible agentic system, detailing how to customize and enhance its capabilities through external integrations, workflow automation, and best practices. It covers practical workflows for debugging, refactoring, testing, and session management while emphasizing optimization strategies for context management, autonomy, and automation to maximize efficiency and adaptability.

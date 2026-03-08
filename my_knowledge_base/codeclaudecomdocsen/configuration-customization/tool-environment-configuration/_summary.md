@@ -1,2 +1,0 @@
-<!-- nav_summary: Configure tools, settings, and terminal for optimal workflow -->
-The **Tool & Environment Configuration** section provides a detailed guide to customizing and optimizing your development workflow by fine-tuning **Claude Code’s settings hierarchy** (Managed, User, Project, Local) for granular control over behavior, alongside **terminal customization**—including themes, line breaks, notifications, and Vim mode—to enhance productivity and user experience.

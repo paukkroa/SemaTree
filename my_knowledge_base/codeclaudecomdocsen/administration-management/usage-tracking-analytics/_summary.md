@@ -1,4 +1,0 @@
-<!-- nav_summary: Monitor system usage, costs, and developer productivity via OpenTelemetry & Git analytics. -->
-The **Usage Tracking & Analytics** section provides a structured approach to monitoring and analyzing system performance, developer activity, and operational efficiency. It begins with **Monitoring**, where administrators configure OpenTelemetry to collect and analyze metrics, events, and cost data, ensuring real-time visibility into system health and resource utilization. The section then shifts to **Track team usage with analytics**, offering tools to measure developer productivity, pull request (PR) workflows, and return on investment (ROI) by correlating Git activity with project outcomes. Together, these components enable data-driven decision-making, cost optimization, and performance improvements across technical and organizational workflows.
-
----
