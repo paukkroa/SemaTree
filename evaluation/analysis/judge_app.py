@@ -12,7 +12,7 @@ from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 import uvicorn
 
-app = FastAPI(title="Agentic Index Judge")
+app = FastAPI(title="SemaTree Judge")
 
 RESULTS_DIR = Path("evaluation/results")
 RESULTS_PATHS = {
@@ -101,7 +101,7 @@ async def index():
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Human Judge - Agentic Index</title>
+    <title>Human Judge - SemaTree</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>

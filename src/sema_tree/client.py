@@ -1,4 +1,4 @@
-"""Interactive ReAct-based MCP Chat Client for Agentic Index."""
+"""Interactive ReAct-based MCP Chat Client for SemaTree."""
 
 from __future__ import annotations
 
@@ -12,7 +12,7 @@ import click
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
 
-from agentic_index.llm import LLMProvider, get_provider
+from sema_tree.llm import LLMProvider, get_provider
 
 # Basic ANSI colors
 CYAN = "\033[96m"
@@ -67,7 +67,7 @@ class AgenticChat:
                     "5. Keep responses concise and helpful."
                 )
 
-                print(f"\n{MAGENTA}{BOLD}💬 Agentic Index Chat Started!{RESET}")
+                print(f"\n{MAGENTA}{BOLD}💬 SemaTree Chat Started!{RESET}")
                 print(f"Type {BOLD}'exit'{RESET} or {BOLD}'quit'{RESET} to end session.\n")
 
                 while True:
@@ -163,7 +163,7 @@ def main(index_path: str, provider: str, model: str | None):
     """Run an interactive agentic chat session."""
     server_params = StdioServerParameters(
         command="uv",
-        args=["run", "agentic-index", "serve", os.path.abspath(index_path)],
+        args=["run", "sema-tree", "serve", os.path.abspath(index_path)],
         env=os.environ.copy()
     )
 

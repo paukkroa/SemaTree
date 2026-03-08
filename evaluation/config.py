@@ -130,7 +130,7 @@ class RAGConfig:
 
 @dataclass
 class AgenticConfig:
-    """Configuration for an Agentic Index run."""
+    """Configuration for an SemaTree run."""
 
     generation_model: str = GENERATION_MODEL
     index_path: str = ""

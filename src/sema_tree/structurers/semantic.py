@@ -10,10 +10,10 @@ from __future__ import annotations
 import logging
 from dataclasses import dataclass, field
 
-from agentic_index.crawlers.base import CrawledPage
-from agentic_index.llm import LLMProvider
-from agentic_index.models import RefType
-from agentic_index.structurers.llm_based import LLMStructurer
+from sema_tree.crawlers.base import CrawledPage
+from sema_tree.llm import LLMProvider
+from sema_tree.models import RefType
+from sema_tree.structurers.llm_based import LLMStructurer
 
 from .base import SkeletonNode
 

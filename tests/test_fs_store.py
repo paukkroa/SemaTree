@@ -6,13 +6,13 @@ from pathlib import Path
 
 import pytest
 
-from agentic_index.fs_store import FileSystemStore, _clean_filename, _parse_fm_field
-from agentic_index.models import AgenticIndex, IndexNode, RefType, Source, SourceType
+from sema_tree.fs_store import FileSystemStore, _clean_filename, _parse_fm_field
+from sema_tree.models import SemaTree, IndexNode, RefType, Source, SourceType
 
 
-def _make_index() -> AgenticIndex:
-    """Build a minimal AgenticIndex for testing persistence."""
-    return AgenticIndex(
+def _make_index() -> SemaTree:
+    """Build a minimal SemaTree for testing persistence."""
+    return SemaTree(
         sources=[
             Source(id="test-src", type=SourceType.website, origin="https://example.com", page_count=3)
         ],
@@ -241,19 +241,19 @@ class TestParseFmField:
 
 
 class TestFileSystemStoreLoad:
-    """Round-trip tests: save() → load() produces equivalent AgenticIndex."""
+    """Round-trip tests: save() → load() produces equivalent SemaTree."""
 
     @pytest.fixture
-    def saved_store(self, tmp_path) -> tuple[FileSystemStore, AgenticIndex]:
+    def saved_store(self, tmp_path) -> tuple[FileSystemStore, SemaTree]:
         store = FileSystemStore(tmp_path / "index")
         index = _make_index()
         store.save(index)
         return store, index
 
-    def test_load_returns_agenticindex(self, saved_store):
+    def test_load_returns_sema_tree(self, saved_store):
         store, _ = saved_store
         loaded = FileSystemStore.load(store.root)
-        assert isinstance(loaded, AgenticIndex)
+        assert isinstance(loaded, SemaTree)
 
     def test_load_preserves_version(self, saved_store):
         store, original = saved_store
@@ -352,7 +352,7 @@ class TestFileSystemStoreLoad:
     def test_roundtrip_local_file_ref_type(self, tmp_path):
         """Leaf with ref_type=file round-trips correctly."""
         store = FileSystemStore(tmp_path / "local_index")
-        index = AgenticIndex(
+        index = SemaTree(
             sources=[Source(id="local-src", type=SourceType.local_folder, origin="/docs")],
             root=IndexNode(
                 id="0",
@@ -380,7 +380,7 @@ class TestFileSystemStoreLoad:
     def test_roundtrip_content_hash(self, tmp_path):
         """content_hash field round-trips through save/load."""
         store = FileSystemStore(tmp_path / "hash_index")
-        index = AgenticIndex(
+        index = SemaTree(
             sources=[Source(id="s", type=SourceType.website, origin="https://x.com")],
             root=IndexNode(
                 id="0",

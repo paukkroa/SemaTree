@@ -5,8 +5,8 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Protocol, runtime_checkable
 
-from agentic_index.crawlers.base import CrawledPage
-from agentic_index.models import RefType
+from sema_tree.crawlers.base import CrawledPage
+from sema_tree.models import RefType
 
 
 @dataclass

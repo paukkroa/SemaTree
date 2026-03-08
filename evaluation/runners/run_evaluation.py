@@ -9,7 +9,7 @@ import logging
 from datetime import datetime, timezone
 from pathlib import Path
 
-from agentic_index.llm import LLMProvider, get_provider
+from sema_tree.llm import LLMProvider, get_provider
 from evaluation.config import AgenticConfig, ExperimentConfig
 from evaluation.corpus.fetcher import fetch_corpus
 from evaluation.corpus.preprocessor import preprocess_corpus
@@ -17,7 +17,7 @@ from evaluation.dataset.generator import load_questions
 from evaluation.scoring.cost_tracker import ExperimentCostTracker
 from evaluation.scoring.quality_judge import judge_answer
 from evaluation.scoring.retrieval import compute_all_retrieval_metrics
-from evaluation.systems.agentic_system import AgenticIndexSystem
+from evaluation.systems.agentic_system import SemaTreeSystem
 from evaluation.systems.base import RetrievalResult, RetrievalSystem
 
 logger = logging.getLogger(__name__)
@@ -112,7 +112,7 @@ async def _build_systems(
         logger.info("Skipping RAG baseline")
 
     for ag_cfg in config.agentic_configs:
-        system = AgenticIndexSystem(ag_cfg, current_index, provider=provider)
+        system = SemaTreeSystem(ag_cfg, current_index, provider=provider)
         await system.setup()
         systems.append(system)
 
@@ -221,7 +221,7 @@ async def run_experiment(
 
 
 def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Run the AgenticIndex evaluation.")
+    parser = argparse.ArgumentParser(description="Run the SemaTree evaluation.")
     parser.add_argument("--index", type=str, default="", help="Path override for index.")
     parser.add_argument("--provider", type=str, default="auto", choices=["auto", "ollama", "gemini"])
     parser.add_argument("--model", type=str, default=None)

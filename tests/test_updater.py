@@ -7,9 +7,9 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from agentic_index.crawlers.base import CrawledPage
-from agentic_index.models import AgenticIndex, IndexNode, RefType, Source, SourceType
-from agentic_index.updater import IncrementalUpdater, UpdateDiff
+from sema_tree.crawlers.base import CrawledPage
+from sema_tree.models import SemaTree, IndexNode, RefType, Source, SourceType
+from sema_tree.updater import IncrementalUpdater, UpdateDiff
 
 
 # ---------------------------------------------------------------------------
@@ -32,7 +32,7 @@ def _sha(content: str) -> str:
 
 def _make_index_with_leaves(
     leaves: list[tuple[str, str, str]]
-) -> AgenticIndex:
+) -> SemaTree:
     """Build a minimal index with specified (url, content, title) leaves."""
     children = [
         IndexNode(
@@ -55,7 +55,7 @@ def _make_index_with_leaves(
         source_id="src",
         children=children,
     )
-    return AgenticIndex(
+    return SemaTree(
         sources=[Source(id="src", type=SourceType.website, origin="https://example.com", page_count=len(leaves))],
         root=IndexNode(id="0", title="Root", summary="Root", children=[source_root]),
     )
@@ -175,7 +175,7 @@ class TestIncrementalUpdateChangedLeaf:
             mock_sum = _mock_summarizer()
 
             # Patch summarizer creation inside apply_diff
-            with patch("agentic_index.updater.Summarizer", return_value=mock_sum):
+            with patch("sema_tree.updater.Summarizer", return_value=mock_sum):
                 result = await updater.apply_diff(old_index, diff, source_id="src")
 
         leaf = result.root.all_leaves()[0]
@@ -196,7 +196,7 @@ class TestIncrementalUpdateChangedLeaf:
 
         original_hash_a = _sha("same content")
         mock_sum = _mock_summarizer()
-        with patch("agentic_index.updater.Summarizer", return_value=mock_sum):
+        with patch("sema_tree.updater.Summarizer", return_value=mock_sum):
             result = await updater.apply_diff(old_index, diff, source_id="src")
 
         leaves = {leaf.ref: leaf for leaf in result.root.all_leaves()}
@@ -220,7 +220,7 @@ class TestIncrementalUpdateAddedLeaf:
         diff = await updater.compute_diff(old_index, new_pages)
 
         mock_sum = _mock_summarizer()
-        with patch("agentic_index.updater.Summarizer", return_value=mock_sum):
+        with patch("sema_tree.updater.Summarizer", return_value=mock_sum):
             result = await updater.apply_diff(old_index, diff, source_id="src")
 
         leaves = result.root.all_leaves()
@@ -241,7 +241,7 @@ class TestIncrementalUpdateDeletedLeaf:
         diff = await updater.compute_diff(old_index, new_pages)
 
         mock_sum = _mock_summarizer()
-        with patch("agentic_index.updater.Summarizer", return_value=mock_sum):
+        with patch("sema_tree.updater.Summarizer", return_value=mock_sum):
             result = await updater.apply_diff(old_index, diff, source_id="src")
 
         leaves = result.root.all_leaves()

@@ -2,9 +2,9 @@
 
 import pytest
 
-from agentic_index.crawlers.base import CrawledPage
-from agentic_index.models import RefType
-from agentic_index.structurers.path_based import PathBasedStructurer
+from sema_tree.crawlers.base import CrawledPage
+from sema_tree.models import RefType
+from sema_tree.structurers.path_based import PathBasedStructurer
 
 
 def _make_pages(urls: list[str]) -> list[CrawledPage]:

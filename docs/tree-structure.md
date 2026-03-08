@@ -1,6 +1,6 @@
 # Tree Structure
 
-AgentIndex produces directory trees of Markdown files. The tree shape depends on how the index was built.
+SemaTree produces directory trees of Markdown files. The tree shape depends on how the index was built.
 
 ---
 
@@ -89,7 +89,7 @@ Each directory represents a conceptual category. It always contains a `_summary.
 
 Getting Started covers the full onboarding workflow from installation through
 running your first index build. Includes environment setup, provider
-configuration, and your first `agentic-index build` command.
+configuration, and your first `sema-tree build` command.
 ```
 
 - The first `<!-- nav_summary: ... -->` comment is the short navigational snippet shown by `ls(include_summaries=true)`.
@@ -172,4 +172,4 @@ The `ref` field is what `get_details()` uses to retrieve the full content. For `
 | `crawled_at` | ISO 8601 timestamp of the last crawl |
 | `page_count` | Number of pages indexed from this source |
 
-`FileSystemStore.load()` reads this file to reconstruct the `AgenticIndex.sources` list, enabling `update` and `add` to work correctly without rebuilding from scratch.
+`FileSystemStore.load()` reads this file to reconstruct the `SemaTree.sources` list, enabling `update` and `add` to work correctly without rebuilding from scratch.

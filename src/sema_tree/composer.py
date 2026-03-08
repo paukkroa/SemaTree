@@ -1,18 +1,18 @@
-"""Multi-source composition for AgenticIndex."""
+"""Multi-source composition for SemaTree."""
 
 from __future__ import annotations
 
 import logging
 from datetime import datetime, timezone
 
-from agentic_index.builder import IndexBuilder, _detect_source_type, _slugify
-from agentic_index.models import AgenticIndex, IndexNode
-from agentic_index.summarizer import Summarizer
+from sema_tree.builder import IndexBuilder, _detect_source_type, _slugify
+from sema_tree.models import SemaTree, IndexNode
+from sema_tree.summarizer import Summarizer
 
 logger = logging.getLogger(__name__)
 
 
-async def _regenerate_root_summary(index: AgenticIndex, summarizer: Summarizer) -> None:
+async def _regenerate_root_summary(index: SemaTree, summarizer: Summarizer) -> None:
     """Regenerate the root node summary from its children."""
     if not index.root.children:
         index.root.summary = "Empty index with no sources."
@@ -33,10 +33,10 @@ async def _regenerate_root_summary(index: AgenticIndex, summarizer: Summarizer) 
 
 
 async def add_source(
-    index: AgenticIndex,
+    index: SemaTree,
     source: str,
     builder: IndexBuilder | None = None,
-) -> AgenticIndex:
+) -> SemaTree:
     """Add a new source to an existing index.
 
     Builds the source tree and attaches it as a child of root.
@@ -67,23 +67,23 @@ async def add_source(
 
 
 async def update_source(
-    index: AgenticIndex,
+    index: SemaTree,
     source_id: str,
     builder: IndexBuilder | None = None,
     incremental: bool = True,
-) -> AgenticIndex:
+) -> SemaTree:
     """Re-crawl and rebuild (or incrementally update) a source within the index.
 
     Args:
-        index: The current AgenticIndex.
+        index: The current SemaTree.
         source_id: ID of the source to update.
         builder: Optional IndexBuilder (created with default provider if omitted).
         incremental: When True, use change detection to only re-process changed
             pages (default).  When False, perform a full rebuild.
     """
-    from agentic_index.crawlers.local import LocalCrawler
-    from agentic_index.crawlers.web import WebCrawler
-    from agentic_index.models import SourceType
+    from sema_tree.crawlers.local import LocalCrawler
+    from sema_tree.crawlers.web import WebCrawler
+    from sema_tree.models import SourceType
 
     builder = builder or IndexBuilder()
 
@@ -115,7 +115,7 @@ async def update_source(
         if not new_pages:
             raise ValueError(f"No pages found at {source_meta.origin}")
 
-        from agentic_index.updater import IncrementalUpdater
+        from sema_tree.updater import IncrementalUpdater
         updater = IncrementalUpdater()
         diff = await updater.compute_diff(index, new_pages)
 
@@ -156,9 +156,9 @@ async def update_source(
 
 
 async def remove_source(
-    index: AgenticIndex,
+    index: SemaTree,
     source_id: str,
-) -> AgenticIndex:
+) -> SemaTree:
     """Remove a source and its subtree from the index."""
     # Remove source metadata
     index.sources = [s for s in index.sources if s.id != source_id]

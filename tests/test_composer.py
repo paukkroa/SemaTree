@@ -6,10 +6,10 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from agentic_index.composer import _reassign_ids, add_source, remove_source
-from agentic_index.crawlers.base import CrawledPage
-from agentic_index.llm import LLMProvider, LLMResponse
-from agentic_index.models import AgenticIndex, IndexNode, RefType, Source, SourceType
+from sema_tree.composer import _reassign_ids, add_source, remove_source
+from sema_tree.crawlers.base import CrawledPage
+from sema_tree.llm import LLMProvider, LLMResponse
+from sema_tree.models import SemaTree, IndexNode, RefType, Source, SourceType
 
 
 class MockProvider(LLMProvider):
@@ -29,9 +29,9 @@ def _make_pages(n: int) -> list[CrawledPage]:
     ]
 
 
-def _make_populated_index() -> AgenticIndex:
+def _make_populated_index() -> SemaTree:
     """An index that already has one source."""
-    return AgenticIndex(
+    return SemaTree(
         sources=[
             Source(id="first-src", type=SourceType.website, origin="https://first.com", page_count=2)
         ],
@@ -184,15 +184,15 @@ class TestRemoveSource:
 class TestAddSource:
     @pytest.mark.asyncio
     async def test_adds_source_to_empty_index(self):
-        index = AgenticIndex()
+        index = SemaTree()
         mock_pages = _make_pages(3)
 
-        with patch("agentic_index.builder.WebCrawler") as MockWebCrawler:
+        with patch("sema_tree.builder.WebCrawler") as MockWebCrawler:
             mock_crawler = AsyncMock()
             mock_crawler.crawl = AsyncMock(return_value=mock_pages)
             MockWebCrawler.return_value = mock_crawler
 
-            from agentic_index.builder import IndexBuilder
+            from sema_tree.builder import IndexBuilder
             builder = IndexBuilder(provider=MockProvider())
             result = await add_source(index, "https://example.com/docs", builder=builder)
 
@@ -204,12 +204,12 @@ class TestAddSource:
         index = _make_populated_index()
         mock_pages = _make_pages(2)
 
-        with patch("agentic_index.builder.WebCrawler") as MockWebCrawler:
+        with patch("sema_tree.builder.WebCrawler") as MockWebCrawler:
             mock_crawler = AsyncMock()
             mock_crawler.crawl = AsyncMock(return_value=mock_pages)
             MockWebCrawler.return_value = mock_crawler
 
-            from agentic_index.builder import IndexBuilder
+            from sema_tree.builder import IndexBuilder
             builder = IndexBuilder(provider=MockProvider())
             result = await add_source(index, "https://example.com/new", builder=builder)
 
@@ -222,12 +222,12 @@ class TestAddSource:
         original_ts = index.updated_at
         mock_pages = _make_pages(2)
 
-        with patch("agentic_index.builder.WebCrawler") as MockWebCrawler:
+        with patch("sema_tree.builder.WebCrawler") as MockWebCrawler:
             mock_crawler = AsyncMock()
             mock_crawler.crawl = AsyncMock(return_value=mock_pages)
             MockWebCrawler.return_value = mock_crawler
 
-            from agentic_index.builder import IndexBuilder
+            from sema_tree.builder import IndexBuilder
             builder = IndexBuilder(provider=MockProvider())
             result = await add_source(index, "https://example.com/new", builder=builder)
 

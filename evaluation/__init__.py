@@ -1,1 +1,1 @@
-"""Evaluation framework for Agentic Index vs RAG comparison."""
+"""Evaluation framework for SemaTree vs RAG comparison."""

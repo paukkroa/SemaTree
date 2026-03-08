@@ -1,6 +1,6 @@
 # Agent Interaction
 
-AgentIndex exposes the **Explicit Toolset** via the Model Context Protocol (MCP). This toolset gives agents fine-grained control over how much context they consume at each step.
+SemaTree exposes the **Explicit Toolset** via the Model Context Protocol (MCP). This toolset gives agents fine-grained control over how much context they consume at each step.
 
 ---
 
@@ -180,7 +180,7 @@ Add the following to your Claude Desktop `claude_desktop_config.json`:
       "command": "uv",
       "args": [
         "run",
-        "agentic-index",
+        "sema-tree",
         "serve",
         "/absolute/path/to/my_docs"
       ]
@@ -198,9 +198,9 @@ You can also set the index path via environment variable instead of passing it a
   "mcpServers": {
     "my-docs": {
       "command": "uv",
-      "args": ["run", "agentic-index", "serve"],
+      "args": ["run", "sema-tree", "serve"],
       "env": {
-        "AGENTIC_INDEX_PATH": "/absolute/path/to/my_docs"
+        "SEMA_TREE_PATH": "/absolute/path/to/my_docs"
       }
     }
   }

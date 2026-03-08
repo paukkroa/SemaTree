@@ -1,6 +1,6 @@
-# AgentIndex
+# SemaTree
 
-AgentIndex turns documentation websites and local folders into navigable semantic file trees that AI agents can explore with simple tools. Instead of retrieving chunks statistically, agents navigate a clean directory hierarchy to find exactly what they need — with precise control over how much context they consume at each step.
+SemaTree turns documentation websites and local folders into navigable semantic file trees that AI agents can explore with simple tools. Instead of retrieving chunks statistically, agents navigate a clean directory hierarchy to find exactly what they need — with precise control over how much context they consume at each step.
 
 ---
 
@@ -18,34 +18,34 @@ pip install -e .
 
 ## LLM Provider Setup
 
-AgentIndex uses an LLM to structure and summarise the index during the build phase. Nine providers are supported via `--provider`.
+SemaTree uses an LLM to structure and summarise the index during the build phase. Nine providers are supported via `--provider`.
 
 ### Auto-detection (default)
 
-With `--provider auto` (the default), AgentIndex tries Ollama first, then falls back to Gemini if `GEMINI_API_KEY` is set.
+With `--provider auto` (the default), SemaTree tries Ollama first, then falls back to Gemini if `GEMINI_API_KEY` is set.
 
 ### Ollama (local, no API key)
 
-Install [Ollama](https://ollama.com), pull a model, and AgentIndex will find it automatically:
+Install [Ollama](https://ollama.com), pull a model, and SemaTree will find it automatically:
 
 ```bash
 ollama pull llama3.2
-agentic-index build https://docs.example.com my_docs  # uses Ollama automatically
+sema-tree build https://docs.example.com my_docs  # uses Ollama automatically
 ```
 
 ### Gemini
 
 ```bash
 export GEMINI_API_KEY=your_key_here
-agentic-index build https://docs.example.com my_docs --provider gemini
+sema-tree build https://docs.example.com my_docs --provider gemini
 ```
 
 ### OpenAI
 
 ```bash
-pip install 'agentic-index[providers]'
+pip install 'sema-tree[providers]'
 export OPENAI_API_KEY=your_key_here
-agentic-index build https://docs.example.com my_docs --provider openai
+sema-tree build https://docs.example.com my_docs --provider openai
 ```
 
 Default model: `gpt-4o-mini`. Override with `--model gpt-4o`.
@@ -53,9 +53,9 @@ Default model: `gpt-4o-mini`. Override with `--model gpt-4o`.
 ### Anthropic
 
 ```bash
-pip install 'agentic-index[providers]'
+pip install 'sema-tree[providers]'
 export ANTHROPIC_API_KEY=your_key_here
-agentic-index build https://docs.example.com my_docs --provider anthropic
+sema-tree build https://docs.example.com my_docs --provider anthropic
 ```
 
 Default model: `claude-haiku-4-5-20251001`. Override with `--model claude-sonnet-4-6`.
@@ -63,9 +63,9 @@ Default model: `claude-haiku-4-5-20251001`. Override with `--model claude-sonnet
 ### OpenRouter
 
 ```bash
-pip install 'agentic-index[providers]'
+pip install 'sema-tree[providers]'
 export OPENROUTER_API_KEY=your_key_here
-agentic-index build https://docs.example.com my_docs --provider openrouter --model mistralai/mistral-7b-instruct
+sema-tree build https://docs.example.com my_docs --provider openrouter --model mistralai/mistral-7b-instruct
 ```
 
 Default model: `openai/gpt-4o-mini`. Accepts any model slug from [openrouter.ai/models](https://openrouter.ai/models).
@@ -75,8 +75,8 @@ Default model: `openai/gpt-4o-mini`. Accepts any model slug from [openrouter.ai/
 LiteLLM is a proxy layer that supports 100+ models using provider-specific env vars (e.g. `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`):
 
 ```bash
-pip install 'agentic-index[providers]'
-agentic-index build https://docs.example.com my_docs --provider litellm --model anthropic/claude-haiku-4-5-20251001
+pip install 'sema-tree[providers]'
+sema-tree build https://docs.example.com my_docs --provider litellm --model anthropic/claude-haiku-4-5-20251001
 ```
 
 Default model: `gpt-4o-mini`. Pass models in LiteLLM's `provider/model` format.
@@ -84,9 +84,9 @@ Default model: `gpt-4o-mini`. Pass models in LiteLLM's `provider/model` format.
 ### HuggingFace Inference API
 
 ```bash
-pip install 'agentic-index[providers]'
+pip install 'sema-tree[providers]'
 export HF_TOKEN=your_token_here
-agentic-index build https://docs.example.com my_docs --provider huggingface --model mistralai/Mistral-7B-Instruct-v0.3
+sema-tree build https://docs.example.com my_docs --provider huggingface --model mistralai/Mistral-7B-Instruct-v0.3
 ```
 
 Default model: `meta-llama/Meta-Llama-3-8B-Instruct`. Also reads `HUGGINGFACE_API_KEY` as a fallback.
@@ -96,7 +96,7 @@ Default model: `meta-llama/Meta-Llama-3-8B-Instruct`. Also reads `HUGGINGFACE_AP
 Start a llama.cpp server with its OpenAI-compatible endpoint, then:
 
 ```bash
-agentic-index build https://docs.example.com my_docs --provider llamacpp
+sema-tree build https://docs.example.com my_docs --provider llamacpp
 ```
 
 Default base URL: `http://localhost:8080`. Override with `LLAMACPP_BASE_URL` env var. No extra packages needed — uses `httpx` which is already a core dependency.
@@ -124,20 +124,20 @@ Default base URL: `http://localhost:8080`. Override with `LLAMACPP_BASE_URL` env
 ### 1. Initialize a knowledge base
 
 ```bash
-agentic-index init my_docs
+sema-tree init my_docs
 ```
 
 ### 2. Add a documentation source
 
 ```bash
 # From a website
-agentic-index add https://docs.example.com/guide my_docs
+sema-tree add https://docs.example.com/guide my_docs
 
 # From a local folder
-agentic-index add ./path/to/local/docs my_docs
+sema-tree add ./path/to/local/docs my_docs
 ```
 
-AgentIndex crawls the source (using `llms.txt` when available, BFS otherwise for web; recursive file walk for local paths), groups pages into semantic categories with an LLM, summarises each node bottom-up, and writes the result as a directory tree:
+SemaTree crawls the source (using `llms.txt` when available, BFS otherwise for web; recursive file walk for local paths), groups pages into semantic categories with an LLM, summarises each node bottom-up, and writes the result as a directory tree:
 
 ```
 my_docs/
@@ -161,7 +161,7 @@ Each subsequent `add` appends a new source's subtree alongside existing ones and
 ### 3. Serve to agents
 
 ```bash
-agentic-index serve my_docs
+sema-tree serve my_docs
 ```
 
 This starts an MCP server that exposes four tools to the agent (see [MCP Tools](#mcp-tools-explicit-toolset) below).
@@ -172,12 +172,12 @@ This starts an MCP server that exposes four tools to the agent (see [MCP Tools](
 
 | Command | Description |
 |---|---|
-| `agentic-index init <path>` | Create a new empty index root directory |
-| `agentic-index add <source> <root>` | Crawl a source and add it to an existing index root |
-| `agentic-index build <source> [-o <path>]` | Build a standalone index from a single source |
-| `agentic-index build-multi <s1> <s2> ... [-o <path>]` | Build an index from multiple sources (optionally with semantic grouping) |
-| `agentic-index update <source-id> <index>` | Re-crawl and incrementally update a source |
-| `agentic-index serve <index>` | Start the MCP server |
+| `sema-tree init <path>` | Create a new empty index root directory |
+| `sema-tree add <source> <root>` | Crawl a source and add it to an existing index root |
+| `sema-tree build <source> [-o <path>]` | Build a standalone index from a single source |
+| `sema-tree build-multi <s1> <s2> ... [-o <path>]` | Build an index from multiple sources (optionally with semantic grouping) |
+| `sema-tree update <source-id> <index>` | Re-crawl and incrementally update a source |
+| `sema-tree serve <index>` | Start the MCP server |
 
 Sources can be a website URL (`https://...`) or a local directory path.
 
@@ -186,13 +186,13 @@ Sources can be a website URL (`https://...`) or a local directory path.
 The `update` command only re-processes pages that actually changed since the last crawl:
 
 ```bash
-agentic-index update my-source-id my_docs
+sema-tree update my-source-id my_docs
 ```
 
 Changed pages are detected by SHA-256 content hash. Only modified leaves and their ancestor branches are re-summarised. Pass `--restructure` to force a full rebuild instead:
 
 ```bash
-agentic-index update my-source-id my_docs --restructure
+sema-tree update my-source-id my_docs --restructure
 ```
 
 ### Semantic (cross-source) indexing
@@ -200,7 +200,7 @@ agentic-index update my-source-id my_docs --restructure
 By default, each source gets its own subtree (`root → source → categories → leaves`). Use `build-multi --structure-mode semantic` to merge all sources into a single topic hierarchy regardless of source origin:
 
 ```bash
-agentic-index build-multi ./docs/technical ./docs/hr ./docs/finance \
+sema-tree build-multi ./docs/technical ./docs/hr ./docs/finance \
     --structure-mode semantic -o my_docs
 ```
 
@@ -236,7 +236,7 @@ Add to your `claude_desktop_config.json`:
       "command": "uv",
       "args": [
         "run",
-        "agentic-index",
+        "sema-tree",
         "serve",
         "/absolute/path/to/my_docs"
       ]
@@ -257,13 +257,13 @@ See [docs/tree-structure.md](docs/tree-structure.md) for the full node format an
 
 ## Evaluation
 
-AgentIndex was evaluated against a Hybrid RAG baseline (ChromaDB + BM25/RRF) on 40 human-judged questions across a 450-document noise-rich corpus (Claude Code docs + OpenAI Codex + Python stdlib + Purina dog breeds).
+SemaTree was evaluated against a Hybrid RAG baseline (ChromaDB + BM25/RRF) on 40 human-judged questions across a 450-document noise-rich corpus (Claude Code docs + OpenAI Codex + Python stdlib + Purina dog breeds).
 
 **Key results:**
 - Up to **~18% improvement in precision and ~19% in recall** on procedural tasks vs Hybrid RAG
 - **1.00 precision** on multi-hop tasks with the Explicit toolset
 - Quality **stable across corpus sizes** — hierarchy shields the agent from haystack growth
-- AgentIndex retrieved **1.17 sources per query** vs **3.9–4.2 for RAG** (mostly noise)
+- SemaTree retrieved **1.17 sources per query** vs **3.9–4.2 for RAG** (mostly noise)
 
 See [evaluation/README.md](evaluation/README.md) for methodology, dataset details, and how to reproduce the experiment.
 

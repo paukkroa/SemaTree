@@ -6,7 +6,7 @@ import json
 import re
 from dataclasses import dataclass
 
-from agentic_index.llm import GeminiProvider, LLMProvider, get_provider
+from sema_tree.llm import GeminiProvider, LLMProvider, get_provider
 from evaluation.config import JUDGE_MODEL
 
 

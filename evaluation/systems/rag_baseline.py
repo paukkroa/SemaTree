@@ -16,7 +16,7 @@ import chromadb
 from sentence_transformers import SentenceTransformer
 from rank_bm25 import BM25Okapi
 
-from agentic_index.llm import LLMProvider, get_provider
+from sema_tree.llm import LLMProvider, get_provider
 from evaluation.config import RAGConfig
 from evaluation.corpus.preprocessor import DocPage
 from evaluation.systems.base import RetrievalResult, RetrievalSystem
@@ -105,7 +105,7 @@ class RAGBaseline(RetrievalSystem):
 
         # 2. Fetch and chunk
         headers = {
-            "User-Agent": "AgenticIndex/0.1"
+            "User-Agent": "SemaTree/0.1"
         }
         async with httpx.AsyncClient(timeout=30.0, follow_redirects=True, headers=headers) as client:
             for item in pages_to_process:

@@ -6,11 +6,11 @@ import json
 
 import pytest
 
-from agentic_index.crawlers.base import CrawledPage
-from agentic_index.llm import LLMProvider, LLMResponse
-from agentic_index.models import RefType
-from agentic_index.structurers.base import SkeletonNode
-from agentic_index.structurers.llm_based import (
+from sema_tree.crawlers.base import CrawledPage
+from sema_tree.llm import LLMProvider, LLMResponse
+from sema_tree.models import RefType
+from sema_tree.structurers.base import SkeletonNode
+from sema_tree.structurers.llm_based import (
     LLMStructurer,
     _collapse_single_children,
     _enforce_min_group_size,

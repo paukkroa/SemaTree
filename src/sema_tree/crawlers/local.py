@@ -7,8 +7,8 @@ from pathlib import Path
 
 from markdownify import markdownify
 
-from agentic_index.crawlers.base import CrawledPage
-from agentic_index.models import RefType
+from sema_tree.crawlers.base import CrawledPage
+from sema_tree.models import RefType
 
 logger = logging.getLogger(__name__)
 

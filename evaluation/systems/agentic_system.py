@@ -1,4 +1,4 @@
-"""Agentic Index retrieval system — actual MCP client."""
+"""SemaTree retrieval system — actual MCP client."""
 
 from __future__ import annotations
 
@@ -12,12 +12,12 @@ from pathlib import Path
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
 
-from agentic_index.llm import LLMProvider, get_provider
+from sema_tree.llm import LLMProvider, get_provider
 from evaluation.config import AgenticConfig
 from evaluation.systems.base import RetrievalResult, RetrievalSystem
 
 
-class AgenticIndexSystem(RetrievalSystem):
+class SemaTreeSystem(RetrievalSystem):
     """Retrieval using an actual MCP client connection.
 
     Simulates a real-world agent connecting to the documentation MCP server
@@ -37,7 +37,7 @@ class AgenticIndexSystem(RetrievalSystem):
         # Build server parameters for stdio
         self._server_params = StdioServerParameters(
             command="uv",
-            args=["run", "agentic-index", "serve", self._index_path],
+            args=["run", "sema-tree", "serve", self._index_path],
             env=os.environ.copy()
         )
 

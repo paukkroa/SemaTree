@@ -1,4 +1,4 @@
-"""Command-line interface for Agentic Index."""
+"""Command-line interface for SemaTree."""
 
 from __future__ import annotations
 
@@ -10,15 +10,15 @@ from pathlib import Path
 
 import click
 
-from agentic_index.llm import PROVIDER_NAMES
-from agentic_index.models import AgenticIndex
+from sema_tree.llm import PROVIDER_NAMES
+from sema_tree.models import SemaTree
 
 
 @click.group()
-@click.version_option(package_name="agentic-index")
+@click.version_option(package_name="sema-tree")
 @click.option("-v", "--verbose", is_flag=True, help="Enable verbose logging.")
 def cli(verbose: bool) -> None:
-    """Agentic Index — hierarchical tree index for agentic document retrieval."""
+    """SemaTree — hierarchical tree index for agentic document retrieval."""
     logging.basicConfig(
         level=logging.DEBUG if verbose else logging.INFO,
         format="%(levelname)s %(name)s: %(message)s",
@@ -43,7 +43,7 @@ def init(path: str) -> None:
     meta_file = root / "_meta.json"
     if not meta_file.exists():
         meta = {
-            "type": "agentic_index_root",
+            "type": "sema_tree_root",
             "version": "1.0",
             "sources": []
         }
@@ -67,9 +67,9 @@ def init(path: str) -> None:
 @click.option("--concurrency", default=10, help="Number of concurrent crawl requests.")
 def build(source: str, output: str, provider: str, model: str | None, max_pages: int, concurrency: int) -> None:
     """Build a new index from a source URL or local path."""
-    from agentic_index.builder import IndexBuilder
-    from agentic_index.llm import get_provider
-    from agentic_index.fs_store import FileSystemStore
+    from sema_tree.builder import IndexBuilder
+    from sema_tree.llm import get_provider
+    from sema_tree.fs_store import FileSystemStore
 
     async def _run() -> None:
         llm = get_provider(provider=provider, model=model)
@@ -104,11 +104,11 @@ def build(source: str, output: str, provider: str, model: str | None, max_pages:
 @click.option("--concurrency", default=10, help="Number of concurrent crawl requests.")
 def add(source: str, root_path: str, provider: str, model: str | None, max_pages: int, concurrency: int) -> None:
     """Add a new source to an existing index root directory."""
-    from agentic_index.builder import IndexBuilder
-    from agentic_index.composer import add_source
-    from agentic_index.fs_store import FileSystemStore
-    from agentic_index.llm import get_provider
-    from agentic_index.models import AgenticIndex
+    from sema_tree.builder import IndexBuilder
+    from sema_tree.composer import add_source
+    from sema_tree.fs_store import FileSystemStore
+    from sema_tree.llm import get_provider
+    from sema_tree.models import SemaTree
 
     root = Path(root_path)
     if not root.exists() or not root.is_dir():
@@ -128,9 +128,9 @@ def add(source: str, root_path: str, provider: str, model: str | None, max_pages
                 index = store.load(root)
             except Exception as e:
                 click.echo(f"Warning: could not load existing index ({e}). Starting fresh.")
-                index = AgenticIndex()
+                index = SemaTree()
         else:
-            index = AgenticIndex()
+            index = SemaTree()
 
         # Add the new source to the in-memory index
         builder = IndexBuilder(provider=llm)
@@ -159,10 +159,10 @@ def add(source: str, root_path: str, provider: str, model: str | None, max_pages
 )
 def update(source_id: str, index_path: str, provider: str, model: str | None, restructure: bool) -> None:
     """Re-crawl and update an existing source in the index."""
-    from agentic_index.builder import IndexBuilder
-    from agentic_index.composer import update_source
-    from agentic_index.fs_store import FileSystemStore
-    from agentic_index.llm import get_provider
+    from sema_tree.builder import IndexBuilder
+    from sema_tree.composer import update_source
+    from sema_tree.fs_store import FileSystemStore
+    from sema_tree.llm import get_provider
 
     async def _run() -> None:
         llm = get_provider(provider=provider, model=model)
@@ -177,7 +177,7 @@ def update(source_id: str, index_path: str, provider: str, model: str | None, re
             )
             store.save(index)
         else:
-            index = AgenticIndex.load(index_path)
+            index = SemaTree.load(index_path)
             index = await update_source(
                 index, source_id, builder=builder, incremental=not restructure
             )
@@ -219,12 +219,12 @@ def build_multi(
     SOURCES can be URLs or local paths. Example:
 
     \b
-        agentic-index build-multi ./docs/technical ./docs/hr \\
+        sema-tree build-multi ./docs/technical ./docs/hr \\
             --structure-mode semantic -o /tmp/combined_idx
     """
-    from agentic_index.builder import IndexBuilder
-    from agentic_index.fs_store import FileSystemStore
-    from agentic_index.llm import get_provider
+    from sema_tree.builder import IndexBuilder
+    from sema_tree.fs_store import FileSystemStore
+    from sema_tree.llm import get_provider
 
     async def _run() -> None:
         llm = get_provider(provider=provider, model=model)
@@ -254,7 +254,7 @@ def explore(index_path: str, node: str) -> None:
         click.echo("Interactive exploration not yet supported for directory indexes. Use 'serve' or standard 'ls' commands.")
         return
 
-    index = AgenticIndex.load(index_path)
+    index = SemaTree.load(index_path)
     current_id = node
 
     while True:
@@ -313,9 +313,9 @@ def search_cmd(query: str, index_path: str, max_results: int) -> None:
         click.echo("Search not yet supported for directory indexes.")
         return
 
-    from agentic_index.search import search_index
+    from sema_tree.search import search_index
 
-    index = AgenticIndex.load(index_path)
+    index = SemaTree.load(index_path)
     results = search_index(index, query, max_results=max_results)
 
     if not results:
@@ -340,15 +340,15 @@ def search_cmd(query: str, index_path: str, max_results: int) -> None:
 )
 @click.option("--model", default=None, help="Model name override.")
 def chat(index_path: str, provider: str, model: str | None) -> None:
-    """Start an interactive chat session with the Agentic Index."""
-    from agentic_index.client import AgenticChat
-    from agentic_index.llm import get_provider
+    """Start an interactive chat session with the SemaTree."""
+    from sema_tree.client import AgenticChat
+    from sema_tree.llm import get_provider
     from mcp import StdioServerParameters
     import os
 
     server_params = StdioServerParameters(
         command="uv",
-        args=["run", "agentic-index", "serve", os.path.abspath(index_path)],
+        args=["run", "sema-tree", "serve", os.path.abspath(index_path)],
         env=os.environ.copy()
     )
 
@@ -371,7 +371,7 @@ def ui(index_path: str, host: str, port: int) -> None:
         click.echo("Web UI not yet supported for directory indexes.")
         return
 
-    from agentic_index.web.app import start_server
+    from sema_tree.web.app import start_server
 
     click.echo(f"Starting web UI at http://{host}:{port}")
     start_server(index_path, host=host, port=port)
@@ -383,10 +383,10 @@ def serve(index_path: str) -> None:
     """Start the MCP server for the index."""
     import os
 
-    os.environ["AGENTIC_INDEX_PATH"] = index_path
+    os.environ["SEMA_TREE_PATH"] = index_path
     click.echo(f"Starting MCP server with index: {index_path}", err=True)
 
-    from agentic_index.server.mcp_server import load_store, mcp
+    from sema_tree.server.mcp_server import load_store, mcp
 
     # Check if it's a directory or legacy JSON file
     if Path(index_path).is_file() and index_path.endswith(".json"):
@@ -406,11 +406,11 @@ def stats(index_path: str) -> None:
         click.echo("Stats not available for directory indexes.")
         return
 
-    index = AgenticIndex.load(index_path)
+    index = SemaTree.load(index_path)
     _print_stats(index)
 
 
-def _print_stats(index: AgenticIndex) -> None:
+def _print_stats(index: SemaTree) -> None:
     """Print index statistics."""
     root = index.root
     click.echo(f"Sources:     {len(index.sources)}")

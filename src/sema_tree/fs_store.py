@@ -1,4 +1,4 @@
-"""Filesystem persistence for Agentic Index.
+"""Filesystem persistence for SemaTree.
 
 This module handles mapping the in-memory IndexNode tree to a physical
 directory structure on disk, enabling version control and human readability.
@@ -12,7 +12,7 @@ import re
 from datetime import datetime, timezone
 from pathlib import Path
 
-from agentic_index.models import AgenticIndex, IndexNode, RefType, Source, SourceType
+from sema_tree.models import SemaTree, IndexNode, RefType, Source, SourceType
 
 logger = logging.getLogger(__name__)
 
@@ -67,7 +67,7 @@ def _extract_summary_from_body(body: str) -> str:
 
 
 class FileSystemStore:
-    """Manages the filesystem representation of an AgenticIndex."""
+    """Manages the filesystem representation of an SemaTree."""
 
     SUMMARY_FILENAME = "_summary.md"
     META_FILENAME = "_meta.json"
@@ -79,8 +79,8 @@ class FileSystemStore:
     # Save
     # ------------------------------------------------------------------
 
-    def save(self, index: AgenticIndex) -> None:
-        """Save the entire AgenticIndex to the filesystem."""
+    def save(self, index: SemaTree) -> None:
+        """Save the entire SemaTree to the filesystem."""
         self.root.mkdir(parents=True, exist_ok=True)
 
         # Save global metadata including sources
@@ -166,8 +166,8 @@ content_hash: {content_hash_str}
     # ------------------------------------------------------------------
 
     @classmethod
-    def load(cls, root_path: str | Path) -> AgenticIndex:
-        """Reconstruct an AgenticIndex from a filesystem directory.
+    def load(cls, root_path: str | Path) -> SemaTree:
+        """Reconstruct an SemaTree from a filesystem directory.
 
         Reads ``_meta.json`` for version/dates/sources and walks the
         directory tree to rebuild the ``IndexNode`` hierarchy.
@@ -198,7 +198,7 @@ content_hash: {content_hash_str}
         children = cls._load_directory(root)
         root_node = IndexNode(id="0", title="Root", summary="", children=children)
 
-        return AgenticIndex(
+        return SemaTree(
             version=version,
             created_at=created_at,
             updated_at=updated_at,

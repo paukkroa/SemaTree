@@ -9,12 +9,12 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Literal
 
-from agentic_index.crawlers.local import LocalCrawler
-from agentic_index.crawlers.web import WebCrawler
-from agentic_index.llm import LLMProvider, get_provider
-from agentic_index.models import AgenticIndex, IndexNode, Source, SourceType
-from agentic_index.structurers import auto_select_structurer
-from agentic_index.summarizer import Summarizer
+from sema_tree.crawlers.local import LocalCrawler
+from sema_tree.crawlers.web import WebCrawler
+from sema_tree.llm import LLMProvider, get_provider
+from sema_tree.models import SemaTree, IndexNode, Source, SourceType
+from sema_tree.structurers import auto_select_structurer
+from sema_tree.summarizer import Summarizer
 
 logger = logging.getLogger(__name__)
 
@@ -55,7 +55,7 @@ class IndexBuilder:
         source_type: str = "auto",
         max_pages: int = 200,
         concurrency: int = 10,
-    ) -> AgenticIndex:
+    ) -> SemaTree:
         """Build a complete index from a single source.
 
         Args:
@@ -65,7 +65,7 @@ class IndexBuilder:
             concurrency: Number of concurrent requests (web only).
 
         Returns:
-            A fully assembled AgenticIndex.
+            A fully assembled SemaTree.
         """
         # Detect source type
         if source_type == "auto":
@@ -124,7 +124,7 @@ class IndexBuilder:
             children=[source_tree],
         )
 
-        index = AgenticIndex(
+        index = SemaTree(
             version="1.0",
             created_at=now,
             updated_at=now,
@@ -147,7 +147,7 @@ class IndexBuilder:
         structure_mode: Literal["source", "semantic"] = "source",
         max_pages: int = 200,
         concurrency: int = 10,
-    ) -> AgenticIndex:
+    ) -> SemaTree:
         """Build an index from multiple sources.
 
         Args:
@@ -159,7 +159,7 @@ class IndexBuilder:
             concurrency: Concurrent requests per source (web only).
 
         Returns:
-            A fully assembled AgenticIndex.
+            A fully assembled SemaTree.
         """
         if not sources:
             raise ValueError("At least one source is required")
@@ -168,9 +168,9 @@ class IndexBuilder:
 
         if structure_mode == "source":
             # Build each source independently and merge at root
-            index = AgenticIndex(version="1.0", created_at=now, updated_at=now)
+            index = SemaTree(version="1.0", created_at=now, updated_at=now)
             for source in sources:
-                from agentic_index.composer import add_source
+                from sema_tree.composer import add_source
                 index = await add_source(index, source, builder=self)
             return index
 
@@ -205,7 +205,7 @@ class IndexBuilder:
             all_sources.append(meta)
 
         # 2. Structure with CrossSourceStructurer
-        from agentic_index.structurers.semantic import CrossSourceStructurer
+        from sema_tree.structurers.semantic import CrossSourceStructurer
         structurer = CrossSourceStructurer(provider=self._provider)
         skeleton = await structurer.structure(pages_by_source)
 
@@ -222,7 +222,7 @@ class IndexBuilder:
             children=[source_tree],
         )
 
-        return AgenticIndex(
+        return SemaTree(
             version="1.0",
             created_at=now,
             updated_at=now,

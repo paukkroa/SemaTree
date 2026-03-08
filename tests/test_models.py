@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from agentic_index.models import AgenticIndex, IndexNode, RefType, Source, SourceType
+from sema_tree.models import SemaTree, IndexNode, RefType, Source, SourceType
 
 
 def _sample_tree() -> IndexNode:
@@ -125,15 +125,15 @@ class TestSource:
         assert source.crawled_at is not None
 
 
-class TestAgenticIndex:
+class TestSemaTree:
     def test_default_creation(self):
-        index = AgenticIndex()
+        index = SemaTree()
         assert index.version == "1.0"
         assert index.root.id == "0"
         assert len(index.sources) == 0
 
     def test_find_source(self):
-        index = AgenticIndex(
+        index = SemaTree(
             sources=[
                 Source(id="s1", type=SourceType.website, origin="https://a.com"),
                 Source(id="s2", type=SourceType.local_folder, origin="/docs"),
@@ -144,7 +144,7 @@ class TestAgenticIndex:
         assert index.find_source("s3") is None
 
     def test_save_and_load(self, tmp_path):
-        index = AgenticIndex()
+        index = SemaTree()
         index.root = _sample_tree()
         index.sources = [
             Source(id="test", type=SourceType.website, origin="https://example.com", page_count=3)
@@ -153,7 +153,7 @@ class TestAgenticIndex:
         path = str(tmp_path / "test_index.json")
         index.save(path)
 
-        loaded = AgenticIndex.load(path)
+        loaded = SemaTree.load(path)
         assert loaded.version == "1.0"
         assert loaded.root.count_leaves() == 3
         assert len(loaded.sources) == 1
@@ -161,7 +161,7 @@ class TestAgenticIndex:
 
     def test_load_fixture(self):
         fixture_path = str(Path(__file__).parent / "fixtures" / "sample_index.json")
-        index = AgenticIndex.load(fixture_path)
+        index = SemaTree.load(fixture_path)
         assert index.version == "1.0"
         assert len(index.sources) == 1
         assert index.root.count_leaves() == 4  # getting-started, auth, endpoints, config

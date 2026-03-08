@@ -1,17 +1,17 @@
 # Evaluation
 
-This directory contains the experiment that benchmarks AgentIndex against Hybrid RAG for technical documentation retrieval.
+This directory contains the experiment that benchmarks SemaTree against Hybrid RAG for technical documentation retrieval.
 
 ---
 
 ## Purpose
 
-The evaluation tests five hypotheses about whether a navigable semantic file tree (AgentIndex) offers advantages over Hybrid RAG for technical documentation Q&A:
+The evaluation tests five hypotheses about whether a navigable semantic file tree (SemaTree) offers advantages over Hybrid RAG for technical documentation Q&A:
 
-- **H1**: AgentIndex retrieves the gold-standard documents more often (higher precision)
-- **H2**: AgentIndex retrieves less noise in large, heterogeneous knowledge bases
-- **H3**: AgentIndex provides more complete answers than Hybrid RAG
-- **H4**: A simplified 2-tool AgentIndex leads to performance gains vs the full 4-tool set
+- **H1**: SemaTree retrieves the gold-standard documents more often (higher precision)
+- **H2**: SemaTree retrieves less noise in large, heterogeneous knowledge bases
+- **H3**: SemaTree provides more complete answers than Hybrid RAG
+- **H4**: A simplified 2-tool SemaTree leads to performance gains vs the full 4-tool set
 - **H5**: Injecting micro-summaries into `ls` results provides more efficient search (fewer tool calls) than listing names only
 
 ---
@@ -46,7 +46,7 @@ The corpus is committed to the repository at `my_knowledge_base_scaled/` so the 
 
 ## Systems Tested
 
-Three AgentIndex toolset configurations were compared against a Hybrid RAG baseline:
+Three SemaTree toolset configurations were compared against a Hybrid RAG baseline:
 
 | System | Tools | Description |
 |---|---|---|
@@ -141,11 +141,11 @@ Raw results are in `evaluation/results/results.json`. Automated metrics are in `
 
 ### Hypothesis outcomes
 
-**H1 — CONFIRMED**: AgentIndex (Explicit) retrieved only **1.17 sources per query** vs **3.9–4.2 for Hybrid RAG** (mostly noise). Logical navigation finds the exact document; RAG floods context with distractor chunks.
+**H1 — CONFIRMED**: SemaTree (Explicit) retrieved only **1.17 sources per query** vs **3.9–4.2 for Hybrid RAG** (mostly noise). Logical navigation finds the exact document; RAG floods context with distractor chunks.
 
-**H2 — CONFIRMED**: RAG retrieved **3.5x more distractor content**. AgentIndex quality remained stable across corpus sizes; RAG degraded with scale as noise chunks saturated context.
+**H2 — CONFIRMED**: RAG retrieved **3.5x more distractor content**. SemaTree quality remained stable across corpus sizes; RAG degraded with scale as noise chunks saturated context.
 
-**H3 — CONFIRMED (category-specific)**: For **PROC (procedural)** tasks, AgentIndex improved **~18% in precision and ~19% in recall** vs Hybrid RAG. Retrieving entire files lets the agent synthesise complete step sequences; disconnected vector chunks miss "boring but vital" steps. For simple SF (single-fact) tasks, Hybrid RAG remained faster and equally accurate.
+**H3 — CONFIRMED (category-specific)**: For **PROC (procedural)** tasks, SemaTree improved **~18% in precision and ~19% in recall** vs Hybrid RAG. Retrieving entire files lets the agent synthesise complete step sequences; disconnected vector chunks miss "boring but vital" steps. For simple SF (single-fact) tasks, Hybrid RAG remained faster and equally accurate.
 
 **H4 — REJECTED**: The **Simplified** toolset (no `get_summary`) performed worst. Removing the peek step forces the agent to either fetch full content speculatively or navigate blind. The `get_summary` call is critical.
 

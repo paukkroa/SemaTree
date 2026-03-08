@@ -4,8 +4,8 @@ from pathlib import Path
 
 import pytest
 
-from agentic_index.crawlers.local import LocalCrawler
-from agentic_index.models import RefType
+from sema_tree.crawlers.local import LocalCrawler
+from sema_tree.models import RefType
 
 
 @pytest.fixture

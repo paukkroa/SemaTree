@@ -48,7 +48,7 @@ def load_data():
     return df
 
 # --- Main App ---
-st.title("🔬 Agentic Index vs. RAG: Performance Dashboard")
+st.title("🔬 SemaTree vs. RAG: Performance Dashboard")
 
 df = load_data()
 
@@ -146,5 +146,5 @@ else:
 
 st.sidebar.info(
     "This dashboard visualizes the average performance of different retrieval systems. "
-    "Use the filters to compare Agentic Index variants against RAG."
+    "Use the filters to compare SemaTree variants against RAG."
 )

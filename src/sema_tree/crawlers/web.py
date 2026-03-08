@@ -12,8 +12,8 @@ import httpx
 from bs4 import BeautifulSoup
 from markdownify import markdownify
 
-from agentic_index.crawlers.base import CrawledPage
-from agentic_index.models import RefType
+from sema_tree.crawlers.base import CrawledPage
+from sema_tree.models import RefType
 
 logger = logging.getLogger(__name__)
 
@@ -45,7 +45,7 @@ class WebCrawler:
         async with httpx.AsyncClient(
             follow_redirects=True,
             timeout=httpx.Timeout(30.0),
-            headers={"User-Agent": "AgenticIndex/0.1"},
+            headers={"User-Agent": "SemaTree/0.1"},
         ) as client:
             pages = await self._try_llms_txt(client)
             if pages:

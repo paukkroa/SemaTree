@@ -6,10 +6,10 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from agentic_index.crawlers.base import CrawledPage
-from agentic_index.models import RefType
-from agentic_index.structurers.semantic import CrossSourceStructurer, _restore_original_titles
-from agentic_index.structurers.base import SkeletonNode
+from sema_tree.crawlers.base import CrawledPage
+from sema_tree.models import RefType
+from sema_tree.structurers.semantic import CrossSourceStructurer, _restore_original_titles
+from sema_tree.structurers.base import SkeletonNode
 
 
 # ---------------------------------------------------------------------------
@@ -103,7 +103,7 @@ class TestCrossSourceStructurerTagging:
         mock_llm_structurer.structure = _fake_structure
 
         with patch(
-            "agentic_index.structurers.semantic.LLMStructurer",
+            "sema_tree.structurers.semantic.LLMStructurer",
             return_value=mock_llm_structurer,
         ):
             await structurer.structure(pages_by_source)
@@ -125,7 +125,7 @@ class TestCrossSourceStructurerTagging:
         mock_llm_structurer.structure = AsyncMock(side_effect=lambda pages: _flat_skeleton(pages))
 
         with patch(
-            "agentic_index.structurers.semantic.LLMStructurer",
+            "sema_tree.structurers.semantic.LLMStructurer",
             return_value=mock_llm_structurer,
         ):
             skeleton = await structurer.structure(pages_by_source)
@@ -147,7 +147,7 @@ class TestCrossSourceStructurerTagging:
         mock_llm_structurer.structure = AsyncMock(side_effect=lambda pages: _flat_skeleton(pages))
 
         with patch(
-            "agentic_index.structurers.semantic.LLMStructurer",
+            "sema_tree.structurers.semantic.LLMStructurer",
             return_value=mock_llm_structurer,
         ):
             skeleton = await structurer.structure(pages_by_source)
@@ -185,7 +185,7 @@ class TestCrossSourceStructurerTagging:
         mock_llm_structurer.structure = _capture
 
         with patch(
-            "agentic_index.structurers.semantic.LLMStructurer",
+            "sema_tree.structurers.semantic.LLMStructurer",
             return_value=mock_llm_structurer,
         ):
             await structurer.structure(pages_by_source)
@@ -199,7 +199,7 @@ class TestSemanticVsSourceMode:
     @pytest.mark.asyncio
     async def test_semantic_mode_flattens_sources(self):
         """In semantic mode, pages from different sources appear under shared categories."""
-        from agentic_index.builder import IndexBuilder
+        from sema_tree.builder import IndexBuilder
 
         pages_by_source = {
             "src-a": [_make_page("/a/auth.md", "Auth Guide", source_id="src-a")],
@@ -216,7 +216,7 @@ class TestSemanticVsSourceMode:
         mock_llm_structurer.structure = AsyncMock(return_value=combined_skeleton)
 
         with patch(
-            "agentic_index.structurers.semantic.LLMStructurer",
+            "sema_tree.structurers.semantic.LLMStructurer",
             return_value=mock_llm_structurer,
         ):
             skeleton = await structurer.structure(pages_by_source)

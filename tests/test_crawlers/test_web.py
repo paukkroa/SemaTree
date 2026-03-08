@@ -8,8 +8,8 @@ from unittest.mock import AsyncMock, MagicMock
 import httpx
 import pytest
 
-from agentic_index.crawlers.web import WebCrawler
-from agentic_index.models import RefType
+from sema_tree.crawlers.web import WebCrawler
+from sema_tree.models import RefType
 
 FIXTURES = Path(__file__).parent.parent / "fixtures"
 

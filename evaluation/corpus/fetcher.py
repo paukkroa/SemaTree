@@ -70,7 +70,7 @@ async def fetch_corpus(
     if urls_to_fetch:
         logger.info("Fetching %d pages...", len(urls_to_fetch))
         headers = {
-            "User-Agent": "AgenticIndex/0.1"
+            "User-Agent": "SemaTree/0.1"
         }
         async with httpx.AsyncClient(timeout=30.0, headers=headers) as client:
             tasks = [fetch_page(client, url) for url in urls_to_fetch]

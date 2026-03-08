@@ -6,9 +6,9 @@ import asyncio
 import logging
 import re
 
-from agentic_index.llm import LLMProvider, LLMResponse, get_provider
-from agentic_index.models import IndexNode, RefType
-from agentic_index.structurers.base import SkeletonNode
+from sema_tree.llm import LLMProvider, LLMResponse, get_provider
+from sema_tree.models import IndexNode, RefType
+from sema_tree.structurers.base import SkeletonNode
 
 logger = logging.getLogger(__name__)
 

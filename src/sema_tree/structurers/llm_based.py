@@ -6,9 +6,9 @@ import json
 import logging
 from typing import Any
 
-from agentic_index.crawlers.base import CrawledPage
-from agentic_index.llm import LLMProvider, get_provider
-from agentic_index.models import RefType
+from sema_tree.crawlers.base import CrawledPage
+from sema_tree.llm import LLMProvider, get_provider
+from sema_tree.models import RefType
 
 from .base import SkeletonNode
 

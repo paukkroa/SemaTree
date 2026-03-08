@@ -1,12 +1,12 @@
 """Tests for keyword search."""
 
-from agentic_index.models import AgenticIndex, IndexNode, RefType, Source, SourceType
-from agentic_index.search import SearchResult, search_index
+from sema_tree.models import SemaTree, IndexNode, RefType, Source, SourceType
+from sema_tree.search import SearchResult, search_index
 
 
-def _make_index() -> AgenticIndex:
+def _make_index() -> SemaTree:
     """Build a test index with known content."""
-    return AgenticIndex(
+    return SemaTree(
         sources=[
             Source(id="test", type=SourceType.website, origin="https://example.com")
         ],

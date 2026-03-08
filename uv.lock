@@ -17,74 +17,6 @@ resolution-markers = [
 ]
 
 [[package]]
-name = "agentic-index"
-version = "0.1.0"
-source = { editable = "." }
-dependencies = [
-    { name = "beautifulsoup4" },
-    { name = "click" },
-    { name = "fastapi" },
-    { name = "google-genai" },
-    { name = "httpx" },
-    { name = "markdownify" },
-    { name = "mcp", extra = ["cli"] },
-    { name = "pydantic" },
-    { name = "rank-bm25" },
-    { name = "streamlit" },
-    { name = "uvicorn" },
-]
-
-[package.optional-dependencies]
-dev = [
-    { name = "pytest" },
-    { name = "pytest-asyncio" },
-    { name = "ruff" },
-]
-eval = [
-    { name = "chromadb" },
-    { name = "matplotlib" },
-    { name = "numpy" },
-    { name = "scipy" },
-    { name = "seaborn" },
-    { name = "sentence-transformers" },
-]
-providers = [
-    { name = "anthropic" },
-    { name = "huggingface-hub" },
-    { name = "litellm" },
-    { name = "openai" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "anthropic", marker = "extra == 'providers'", specifier = ">=0.40" },
-    { name = "beautifulsoup4", specifier = ">=4.12" },
-    { name = "chromadb", marker = "extra == 'eval'", specifier = ">=0.5" },
-    { name = "click", specifier = ">=8.1" },
-    { name = "fastapi", specifier = ">=0.115" },
-    { name = "google-genai", specifier = ">=1.0" },
-    { name = "httpx", specifier = ">=0.27" },
-    { name = "huggingface-hub", marker = "extra == 'providers'", specifier = ">=0.24" },
-    { name = "litellm", marker = "extra == 'providers'", specifier = ">=1.40" },
-    { name = "markdownify", specifier = ">=0.14" },
-    { name = "matplotlib", marker = "extra == 'eval'", specifier = ">=3.9" },
-    { name = "mcp", extras = ["cli"], specifier = ">=1.0" },
-    { name = "numpy", marker = "extra == 'eval'", specifier = ">=1.26" },
-    { name = "openai", marker = "extra == 'providers'", specifier = ">=1.0" },
-    { name = "pydantic", specifier = ">=2.0" },
-    { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0" },
-    { name = "pytest-asyncio", marker = "extra == 'dev'", specifier = ">=0.24" },
-    { name = "rank-bm25", specifier = ">=0.2.2" },
-    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.8" },
-    { name = "scipy", marker = "extra == 'eval'", specifier = ">=1.14" },
-    { name = "seaborn", marker = "extra == 'eval'", specifier = ">=0.13" },
-    { name = "sentence-transformers", marker = "extra == 'eval'", specifier = ">=3.0" },
-    { name = "streamlit", specifier = ">=1.54.0" },
-    { name = "uvicorn", specifier = ">=0.30" },
-]
-provides-extras = ["providers", "eval", "dev"]
-
-[[package]]
 name = "aiohappyeyeballs"
 version = "2.6.1"
 source = { registry = "https://pypi.org/simple" }
@@ -3832,6 +3764,74 @@ sdist = { url = "https://files.pythonhosted.org/packages/86/59/a451d7420a77ab0b9
 wheels = [
     { url = "https://files.pythonhosted.org/packages/83/11/00d3c3dfc25ad54e731d91449895a79e4bf2384dc3ac01809010ba88f6d5/seaborn-0.13.2-py3-none-any.whl", hash = "sha256:636f8336facf092165e27924f223d3c62ca560b1f2bb5dff7ab7fad265361987", size = 294914, upload-time = "2024-01-25T13:21:49.598Z" },
 ]
+
+[[package]]
+name = "sema-tree"
+version = "0.1.0"
+source = { editable = "." }
+dependencies = [
+    { name = "beautifulsoup4" },
+    { name = "click" },
+    { name = "fastapi" },
+    { name = "google-genai" },
+    { name = "httpx" },
+    { name = "markdownify" },
+    { name = "mcp", extra = ["cli"] },
+    { name = "pydantic" },
+    { name = "rank-bm25" },
+    { name = "streamlit" },
+    { name = "uvicorn" },
+]
+
+[package.optional-dependencies]
+dev = [
+    { name = "pytest" },
+    { name = "pytest-asyncio" },
+    { name = "ruff" },
+]
+eval = [
+    { name = "chromadb" },
+    { name = "matplotlib" },
+    { name = "numpy" },
+    { name = "scipy" },
+    { name = "seaborn" },
+    { name = "sentence-transformers" },
+]
+providers = [
+    { name = "anthropic" },
+    { name = "huggingface-hub" },
+    { name = "litellm" },
+    { name = "openai" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "anthropic", marker = "extra == 'providers'", specifier = ">=0.40" },
+    { name = "beautifulsoup4", specifier = ">=4.12" },
+    { name = "chromadb", marker = "extra == 'eval'", specifier = ">=0.5" },
+    { name = "click", specifier = ">=8.1" },
+    { name = "fastapi", specifier = ">=0.115" },
+    { name = "google-genai", specifier = ">=1.0" },
+    { name = "httpx", specifier = ">=0.27" },
+    { name = "huggingface-hub", marker = "extra == 'providers'", specifier = ">=0.24" },
+    { name = "litellm", marker = "extra == 'providers'", specifier = ">=1.40" },
+    { name = "markdownify", specifier = ">=0.14" },
+    { name = "matplotlib", marker = "extra == 'eval'", specifier = ">=3.9" },
+    { name = "mcp", extras = ["cli"], specifier = ">=1.0" },
+    { name = "numpy", marker = "extra == 'eval'", specifier = ">=1.26" },
+    { name = "openai", marker = "extra == 'providers'", specifier = ">=1.0" },
+    { name = "pydantic", specifier = ">=2.0" },
+    { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0" },
+    { name = "pytest-asyncio", marker = "extra == 'dev'", specifier = ">=0.24" },
+    { name = "rank-bm25", specifier = ">=0.2.2" },
+    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.8" },
+    { name = "scipy", marker = "extra == 'eval'", specifier = ">=1.14" },
+    { name = "seaborn", marker = "extra == 'eval'", specifier = ">=0.13" },
+    { name = "sentence-transformers", marker = "extra == 'eval'", specifier = ">=3.0" },
+    { name = "streamlit", specifier = ">=1.54.0" },
+    { name = "uvicorn", specifier = ">=0.30" },
+]
+provides-extras = ["providers", "eval", "dev"]
 
 [[package]]
 name = "sentence-transformers"

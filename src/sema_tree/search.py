@@ -1,4 +1,4 @@
-"""Keyword search over an AgenticIndex."""
+"""Keyword search over an SemaTree."""
 
 from __future__ import annotations
 
@@ -6,7 +6,7 @@ import math
 import re
 from dataclasses import dataclass
 
-from agentic_index.models import AgenticIndex, IndexNode
+from sema_tree.models import SemaTree, IndexNode
 
 
 @dataclass
@@ -34,7 +34,7 @@ def _collect_nodes(node: IndexNode) -> list[IndexNode]:
 
 
 def search_index(
-    index: AgenticIndex,
+    index: SemaTree,
     query: str,
     max_results: int = 10,
 ) -> list[SearchResult]:

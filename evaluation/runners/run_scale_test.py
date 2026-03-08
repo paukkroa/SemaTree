@@ -19,7 +19,7 @@ from evaluation.corpus.preprocessor import DocPage, preprocess_corpus
 from evaluation.dataset.generator import load_questions
 from evaluation.scoring.retrieval import compute_all_retrieval_metrics
 from evaluation.systems.base import RetrievalResult
-from agentic_index.llm import LLMProvider, get_provider
+from sema_tree.llm import LLMProvider, get_provider
 
 logger = logging.getLogger(__name__)
 
@@ -169,7 +169,7 @@ async def run_scale_test(
 
 def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Run the AgenticIndex scalability test.",
+        description="Run the SemaTree scalability test.",
     )
     parser.add_argument(
         "--provider",

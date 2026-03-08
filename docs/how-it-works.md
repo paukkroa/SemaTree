@@ -1,6 +1,6 @@
-# How AgentIndex Works
+# How SemaTree Works
 
-AgentIndex transforms documentation sources into navigable semantic file trees through a four-stage pipeline: **Crawl → Structure → Summarize → Assemble**. It also supports loading existing indexes back into memory, incremental updates, and cross-source semantic structuring.
+SemaTree transforms documentation sources into navigable semantic file trees through a four-stage pipeline: **Crawl → Structure → Summarize → Assemble**. It also supports loading existing indexes back into memory, incremental updates, and cross-source semantic structuring.
 
 ---
 
@@ -101,13 +101,13 @@ The resulting directory is a standard filesystem tree that can be committed to g
 
 ## Loading an Existing Index
 
-`FileSystemStore.load(path)` reconstructs a full `AgenticIndex` from a saved directory:
+`FileSystemStore.load(path)` reconstructs a full `SemaTree` from a saved directory:
 
 1. Reads `_meta.json` for version, timestamps, and the `sources` list.
 2. Walks the directory tree. For each subdirectory, reads `_summary.md` to extract the `nav_summary`, `id`, `title`, and `source_id` from the embedded comments.
 3. For each `.md` file, parses the YAML frontmatter to reconstruct all `IndexNode` fields including `ref`, `ref_type`, `source_id`, and `content_hash`.
 4. Sorts children by their `id` field to restore the original tree order.
-5. Returns a fully populated `AgenticIndex`.
+5. Returns a fully populated `SemaTree`.
 
 This is used by the `add` and `update` CLI commands to modify an existing index without starting from scratch.
 

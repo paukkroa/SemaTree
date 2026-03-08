@@ -1,4 +1,4 @@
-"""MCP server exposing Agentic Index tools (Filesystem Backend)."""
+"""MCP server exposing SemaTree tools (Filesystem Backend)."""
 
 from __future__ import annotations
 
@@ -10,14 +10,14 @@ from pathlib import Path
 import httpx
 from mcp.server.fastmcp import FastMCP
 
-from agentic_index.fs_store import FileSystemStore
+from sema_tree.fs_store import FileSystemStore
 
 MAX_CONTENT_LENGTH = 8000
 
 mcp = FastMCP(
-    "agentic-index",
+    "sema-tree",
     instructions=(
-        "AgentIndex Explicit Toolset: use ls() to browse the index by name, "
+        "SemaTree Explicit Toolset: use ls() to browse the index by name, "
         "get_summary() to peek at a node before committing to it, "
         "find() to search by keyword or pattern, and "
         "get_details() to fetch the full live content of a document."
@@ -31,7 +31,7 @@ def _get_store() -> FileSystemStore:
     """Return the loaded store, raising if not initialized."""
     global _store
     if _store is None:
-        path = os.environ.get("AGENTIC_INDEX_PATH")
+        path = os.environ.get("SEMA_TREE_PATH")
         if not path:
             # Default to current directory if not set
             path = "."
@@ -135,7 +135,7 @@ async def get_details(path: str) -> str:
     if cache_file.exists():
         return f"Live content for '{path}' ({url}) [cached]:\n\n" + cache_file.read_text(encoding="utf-8")
 
-    headers = {"User-Agent": "AgenticIndex/0.1"}
+    headers = {"User-Agent": "SemaTree/0.1"}
     try:
         async with httpx.AsyncClient(follow_redirects=True, timeout=30.0, headers=headers) as client:
             resp = await client.get(url)

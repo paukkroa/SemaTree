@@ -6,7 +6,7 @@ import json
 import re
 from pathlib import Path
 
-from agentic_index.llm import LLMProvider, get_provider
+from sema_tree.llm import LLMProvider, get_provider
 from evaluation.config import GENERATION_MODEL, QUESTION_CATEGORIES
 
 GENERATION_SYSTEM_PROMPT = """\

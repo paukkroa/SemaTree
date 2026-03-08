@@ -230,7 +230,7 @@ class OpenAIProvider(LLMProvider):
         try:
             import openai
         except ImportError:
-            raise RuntimeError("openai package not installed. Run: pip install 'agentic-index[providers]'")
+            raise RuntimeError("openai package not installed. Run: pip install 'sema-tree[providers]'")
 
         client = openai.AsyncOpenAI(api_key=self._api_key)
         messages = []
@@ -274,7 +274,7 @@ class AnthropicProvider(LLMProvider):
         try:
             import anthropic
         except ImportError:
-            raise RuntimeError("anthropic package not installed. Run: pip install 'agentic-index[providers]'")
+            raise RuntimeError("anthropic package not installed. Run: pip install 'sema-tree[providers]'")
 
         client = anthropic.AsyncAnthropic(api_key=self._api_key)
         kwargs: dict = {
@@ -317,14 +317,14 @@ class OpenRouterProvider(LLMProvider):
         try:
             import openai
         except ImportError:
-            raise RuntimeError("openai package not installed. Run: pip install 'agentic-index[providers]'")
+            raise RuntimeError("openai package not installed. Run: pip install 'sema-tree[providers]'")
 
         client = openai.AsyncOpenAI(
             api_key=self._api_key,
             base_url="https://openrouter.ai/api/v1",
             default_headers={
-                "HTTP-Referer": "https://github.com/agentic-index",
-                "X-Title": "Agentic Index",
+                "HTTP-Referer": "https://github.com/sema-tree",
+                "X-Title": "SemaTree",
             },
         )
         messages = []
@@ -365,7 +365,7 @@ class LiteLLMProvider(LLMProvider):
         try:
             import litellm
         except ImportError:
-            raise RuntimeError("litellm package not installed. Run: pip install 'agentic-index[providers]'")
+            raise RuntimeError("litellm package not installed. Run: pip install 'sema-tree[providers]'")
 
         messages = []
         if system:
@@ -414,7 +414,7 @@ class HuggingFaceProvider(LLMProvider):
         try:
             from huggingface_hub import AsyncInferenceClient
         except ImportError:
-            raise RuntimeError("huggingface_hub package not installed. Run: pip install 'agentic-index[providers]'")
+            raise RuntimeError("huggingface_hub package not installed. Run: pip install 'sema-tree[providers]'")
 
         client = AsyncInferenceClient(model=self.model, token=self._api_key)
         messages = []

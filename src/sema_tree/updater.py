@@ -1,4 +1,4 @@
-"""Incremental update engine for AgenticIndex.
+"""Incremental update engine for SemaTree.
 
 Detects which pages changed since the last crawl and updates only the
 affected nodes, avoiding a full re-crawl and re-summarize cycle.
@@ -10,9 +10,9 @@ import hashlib
 import logging
 from dataclasses import dataclass, field
 
-from agentic_index.crawlers.base import CrawledPage
-from agentic_index.models import AgenticIndex, IndexNode
-from agentic_index.summarizer import Summarizer
+from sema_tree.crawlers.base import CrawledPage
+from sema_tree.models import SemaTree, IndexNode
+from sema_tree.summarizer import Summarizer
 
 logger = logging.getLogger(__name__)
 
@@ -39,7 +39,7 @@ class UpdateDiff:
 
 
 class IncrementalUpdater:
-    """Compute diffs and apply incremental updates to an AgenticIndex."""
+    """Compute diffs and apply incremental updates to an SemaTree."""
 
     # ------------------------------------------------------------------
     # Diff computation
@@ -47,7 +47,7 @@ class IncrementalUpdater:
 
     async def compute_diff(
         self,
-        old_index: AgenticIndex,
+        old_index: SemaTree,
         new_pages: list[CrawledPage],
     ) -> UpdateDiff:
         """Compare ``old_index`` leaves against ``new_pages`` by content hash.
@@ -104,11 +104,11 @@ class IncrementalUpdater:
 
     async def apply_diff(
         self,
-        index: AgenticIndex,
+        index: SemaTree,
         diff: UpdateDiff,
         source_id: str,
         builder: object | None = None,
-    ) -> AgenticIndex:
+    ) -> SemaTree:
         """Apply an *UpdateDiff* to *index* in-place and return it.
 
         Strategy:
@@ -156,7 +156,7 @@ class IncrementalUpdater:
         if diff.added:
             source_root = self._find_source_root(index, source_id)
             for page in diff.added:
-                from agentic_index.structurers.base import SkeletonNode
+                from sema_tree.structurers.base import SkeletonNode
                 skeleton_leaf = SkeletonNode(
                     title=page.title,
                     ref=page.url_or_path,
@@ -234,7 +234,7 @@ class IncrementalUpdater:
         return None
 
     def _find_source_root(
-        self, index: AgenticIndex, source_id: str
+        self, index: SemaTree, source_id: str
     ) -> IndexNode | None:
         """Find the top-level source node matching source_id."""
         for child in index.root.children:

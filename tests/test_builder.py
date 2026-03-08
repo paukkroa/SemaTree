@@ -6,9 +6,9 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from agentic_index.builder import IndexBuilder, _detect_source_type, _slugify
-from agentic_index.llm import LLMProvider, LLMResponse
-from agentic_index.models import SourceType
+from sema_tree.builder import IndexBuilder, _detect_source_type, _slugify
+from sema_tree.llm import LLMProvider, LLMResponse
+from sema_tree.models import SourceType
 
 
 class MockProvider(LLMProvider):
@@ -50,8 +50,8 @@ class TestDetectSourceType:
 class TestIndexBuilder:
     @pytest.mark.asyncio
     async def test_build_website(self):
-        from agentic_index.crawlers.base import CrawledPage
-        from agentic_index.models import RefType
+        from sema_tree.crawlers.base import CrawledPage
+        from sema_tree.models import RefType
 
         mock_pages = [
             CrawledPage(
@@ -70,7 +70,7 @@ class TestIndexBuilder:
             ),
         ]
 
-        with patch("agentic_index.builder.WebCrawler") as MockWebCrawler:
+        with patch("sema_tree.builder.WebCrawler") as MockWebCrawler:
             mock_crawler = AsyncMock()
             mock_crawler.crawl = AsyncMock(return_value=mock_pages)
             MockWebCrawler.return_value = mock_crawler
@@ -85,7 +85,7 @@ class TestIndexBuilder:
 
     @pytest.mark.asyncio
     async def test_build_raises_on_empty(self):
-        with patch("agentic_index.builder.WebCrawler") as MockWebCrawler:
+        with patch("sema_tree.builder.WebCrawler") as MockWebCrawler:
             mock_crawler = AsyncMock()
             mock_crawler.crawl = AsyncMock(return_value=[])
             MockWebCrawler.return_value = mock_crawler

@@ -1,4 +1,4 @@
-"""Core data models for Agentic Index."""
+"""Core data models for SemaTree."""
 
 from __future__ import annotations
 
@@ -78,7 +78,7 @@ class Source(BaseModel):
     page_count: int = Field(default=0, description="Number of pages/files crawled")
 
 
-class AgenticIndex(BaseModel):
+class SemaTree(BaseModel):
     """Top-level container for the entire index."""
 
     version: str = Field(default="1.0")
@@ -101,7 +101,7 @@ class AgenticIndex(BaseModel):
         Path(path).write_text(self.model_dump_json(indent=2))
 
     @classmethod
-    def load(cls, path: str) -> AgenticIndex:
+    def load(cls, path: str) -> SemaTree:
         from pathlib import Path
 
         return cls.model_validate_json(Path(path).read_text())

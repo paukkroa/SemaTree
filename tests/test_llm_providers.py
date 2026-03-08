@@ -8,7 +8,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from agentic_index.llm import (
+from sema_tree.llm import (
     PROVIDER_NAMES,
     AnthropicProvider,
     HuggingFaceProvider,
@@ -294,7 +294,7 @@ class TestLlamaCppProvider:
         mock_client_instance.__aexit__ = AsyncMock(return_value=False)
         mock_client_instance.post = AsyncMock(return_value=mock_response)
 
-        with patch("agentic_index.llm.httpx.AsyncClient", return_value=mock_client_instance):
+        with patch("sema_tree.llm.httpx.AsyncClient", return_value=mock_client_instance):
             p = LlamaCppProvider(model="llama3", base_url="http://localhost:8080")
             result = await p.generate("hi", system="sys")
 
@@ -324,7 +324,7 @@ class TestLlamaCppProvider:
         mock_client_instance.__aexit__ = AsyncMock(return_value=False)
         mock_client_instance.post = AsyncMock(return_value=mock_response)
 
-        with patch("agentic_index.llm.httpx.AsyncClient", return_value=mock_client_instance):
+        with patch("sema_tree.llm.httpx.AsyncClient", return_value=mock_client_instance):
             p = LlamaCppProvider()  # no model
             await p.generate("hi")
 

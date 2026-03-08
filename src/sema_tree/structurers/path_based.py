@@ -4,8 +4,8 @@ from __future__ import annotations
 
 from urllib.parse import urlparse
 
-from agentic_index.crawlers.base import CrawledPage
-from agentic_index.models import RefType
+from sema_tree.crawlers.base import CrawledPage
+from sema_tree.models import RefType
 
 from .base import SkeletonNode
 

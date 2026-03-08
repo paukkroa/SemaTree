@@ -1,4 +1,4 @@
-"""FastAPI web application for managing Agentic Index."""
+"""FastAPI web application for managing SemaTree."""
 
 from __future__ import annotations
 
@@ -13,28 +13,28 @@ from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-from agentic_index.models import AgenticIndex, IndexNode
-from agentic_index.search import search_index
+from sema_tree.models import SemaTree, IndexNode
+from sema_tree.search import search_index
 
 logger = logging.getLogger(__name__)
 
 STATIC_DIR = Path(__file__).parent / "static"
 
-app = FastAPI(title="Agentic Index", version="0.1.0")
+app = FastAPI(title="SemaTree", version="0.1.0")
 app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 
 # Global state
-_index: AgenticIndex | None = None
+_index: SemaTree | None = None
 _index_path: str | None = None
 
 
 def load_index(path: str) -> None:
     global _index, _index_path
-    _index = AgenticIndex.load(path)
+    _index = SemaTree.load(path)
     _index_path = path
 
 
-def _get_index() -> AgenticIndex:
+def _get_index() -> SemaTree:
     if _index is None:
         raise HTTPException(status_code=400, detail="No index loaded")
     return _index
@@ -191,7 +191,7 @@ async def add_source(req: AddSourceRequest):
     global _index
     idx = _get_index()
 
-    from agentic_index.composer import add_source as _add_source
+    from sema_tree.composer import add_source as _add_source
 
     try:
         _index = await _add_source(idx, req.source)
@@ -206,7 +206,7 @@ async def remove_source(source_id: str):
     global _index
     idx = _get_index()
 
-    from agentic_index.composer import remove_source as _remove_source
+    from sema_tree.composer import remove_source as _remove_source
 
     try:
         _index = await _remove_source(idx, source_id)
@@ -221,7 +221,7 @@ async def update_source(source_id: str):
     global _index
     idx = _get_index()
 
-    from agentic_index.composer import update_source as _update_source
+    from sema_tree.composer import update_source as _update_source
 
     try:
         _index = await _update_source(idx, source_id)

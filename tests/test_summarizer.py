@@ -6,11 +6,11 @@ from unittest.mock import AsyncMock
 
 import pytest
 
-from agentic_index.crawlers.base import CrawledPage
-from agentic_index.llm import LLMProvider, LLMResponse
-from agentic_index.models import RefType
-from agentic_index.structurers.base import SkeletonNode
-from agentic_index.summarizer import Summarizer
+from sema_tree.crawlers.base import CrawledPage
+from sema_tree.llm import LLMProvider, LLMResponse
+from sema_tree.models import RefType
+from sema_tree.structurers.base import SkeletonNode
+from sema_tree.summarizer import Summarizer
 
 
 class MockProvider(LLMProvider):

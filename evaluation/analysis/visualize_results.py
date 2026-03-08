@@ -30,7 +30,7 @@ def generate_html(results_path: Path, questions_path: Path, output_path: Path):
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Agentic Index vs RAG Comparison</title>
+    <title>SemaTree vs RAG Comparison</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body { background-color: #f8f9fa; padding-top: 2rem; }
@@ -45,7 +45,7 @@ def generate_html(results_path: Path, questions_path: Path, output_path: Path):
 <body>
 <div class="container">
     <h1 class="mb-4">Evaluation Results Comparison</h1>
-    <p class="lead">Comparing <strong>RAG Baseline</strong> vs <strong>Agentic Index</strong> side-by-side.</p>
+    <p class="lead">Comparing <strong>RAG Baseline</strong> vs <strong>SemaTree</strong> side-by-side.</p>
     <hr>
 """
 
