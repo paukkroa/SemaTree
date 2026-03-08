@@ -61,15 +61,17 @@ class TestSummarizer:
         provider = MockProvider()
         summarizer = Summarizer(provider=provider)
 
+        # Description must be > 50 chars for the summarizer to skip the LLM call
+        long_desc = "How to install and set up the tool from scratch using pip or uv on macOS and Linux"
         skeleton = _make_leaf(
             "Getting Started",
             "Full content here...",
-            llms_txt_description="How to install and set up the tool",
+            llms_txt_description=long_desc,
         )
         result = await summarizer.summarize_tree(skeleton, "test-src", "0.0")
 
         # Should use the description directly without calling LLM
-        assert result.summary == "How to install and set up the tool"
+        assert result.summary == long_desc
         assert provider.call_count == 0
 
     @pytest.mark.asyncio
