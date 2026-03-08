@@ -18,27 +18,104 @@ pip install -e .
 
 ## LLM Provider Setup
 
-AgentIndex uses an LLM to structure and summarise the index during the build phase. Two providers are supported:
+AgentIndex uses an LLM to structure and summarise the index during the build phase. Nine providers are supported via `--provider`.
 
-### Ollama (local, no API key required)
+### Auto-detection (default)
 
-Install [Ollama](https://ollama.com) and pull a model:
+With `--provider auto` (the default), AgentIndex tries Ollama first, then falls back to Gemini if `GEMINI_API_KEY` is set.
+
+### Ollama (local, no API key)
+
+Install [Ollama](https://ollama.com), pull a model, and AgentIndex will find it automatically:
 
 ```bash
 ollama pull llama3.2
+agentic-index build https://docs.example.com my_docs  # uses Ollama automatically
 ```
 
-AgentIndex auto-detects a running Ollama instance. No configuration needed.
-
-### Gemini (cloud)
-
-Set your API key:
+### Gemini
 
 ```bash
 export GEMINI_API_KEY=your_key_here
+agentic-index build https://docs.example.com my_docs --provider gemini
 ```
 
-AgentIndex auto-detects the key and uses Gemini if Ollama is not running. You can also pass `--provider gemini` explicitly.
+### OpenAI
+
+```bash
+pip install 'agentic-index[providers]'
+export OPENAI_API_KEY=your_key_here
+agentic-index build https://docs.example.com my_docs --provider openai
+```
+
+Default model: `gpt-4o-mini`. Override with `--model gpt-4o`.
+
+### Anthropic
+
+```bash
+pip install 'agentic-index[providers]'
+export ANTHROPIC_API_KEY=your_key_here
+agentic-index build https://docs.example.com my_docs --provider anthropic
+```
+
+Default model: `claude-haiku-4-5-20251001`. Override with `--model claude-sonnet-4-6`.
+
+### OpenRouter
+
+```bash
+pip install 'agentic-index[providers]'
+export OPENROUTER_API_KEY=your_key_here
+agentic-index build https://docs.example.com my_docs --provider openrouter --model mistralai/mistral-7b-instruct
+```
+
+Default model: `openai/gpt-4o-mini`. Accepts any model slug from [openrouter.ai/models](https://openrouter.ai/models).
+
+### LiteLLM
+
+LiteLLM is a proxy layer that supports 100+ models using provider-specific env vars (e.g. `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`):
+
+```bash
+pip install 'agentic-index[providers]'
+agentic-index build https://docs.example.com my_docs --provider litellm --model anthropic/claude-haiku-4-5-20251001
+```
+
+Default model: `gpt-4o-mini`. Pass models in LiteLLM's `provider/model` format.
+
+### HuggingFace Inference API
+
+```bash
+pip install 'agentic-index[providers]'
+export HF_TOKEN=your_token_here
+agentic-index build https://docs.example.com my_docs --provider huggingface --model mistralai/Mistral-7B-Instruct-v0.3
+```
+
+Default model: `meta-llama/Meta-Llama-3-8B-Instruct`. Also reads `HUGGINGFACE_API_KEY` as a fallback.
+
+### llama.cpp (local server)
+
+Start a llama.cpp server with its OpenAI-compatible endpoint, then:
+
+```bash
+agentic-index build https://docs.example.com my_docs --provider llamacpp
+```
+
+Default base URL: `http://localhost:8080`. Override with `LLAMACPP_BASE_URL` env var. No extra packages needed — uses `httpx` which is already a core dependency.
+
+---
+
+### Provider reference
+
+| Provider | `--provider` | Key env var | Extra install |
+|---|---|---|---|
+| Auto (Ollama → Gemini) | `auto` | — | — |
+| Ollama | `ollama` | — | — |
+| Google Gemini | `gemini` | `GEMINI_API_KEY` | — |
+| OpenAI | `openai` | `OPENAI_API_KEY` | `[providers]` |
+| Anthropic | `anthropic` | `ANTHROPIC_API_KEY` | `[providers]` |
+| OpenRouter | `openrouter` | `OPENROUTER_API_KEY` | `[providers]` |
+| LiteLLM | `litellm` | provider-specific | `[providers]` |
+| HuggingFace | `huggingface` | `HF_TOKEN` | `[providers]` |
+| llama.cpp | `llamacpp` | `LLAMACPP_BASE_URL` (opt.) | — |
 
 ---
 
@@ -206,8 +283,10 @@ Linting:
 ruff check .
 ```
 
-Install dev and eval dependencies:
+Install dev, eval, and optional provider dependencies:
 
 ```bash
-uv pip install -e ".[dev,eval]"
+uv pip install -e ".[dev,eval]"        # dev tools + eval extras
+uv pip install -e ".[providers]"       # OpenAI, Anthropic, LiteLLM, HuggingFace
+uv pip install -e ".[dev,providers]"   # everything
 ```

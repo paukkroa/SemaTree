@@ -58,6 +58,10 @@ The result is a single tree where, for example, an "Authentication" category may
 
 `auto_select_structurer()` picks the LLM structurer when a provider is available and the page count warrants it, otherwise falling back to path-based.
 
+### LLM providers
+
+Any of the nine supported providers can be used for the structuring and summarisation stages. The provider is selected via `--provider` on the CLI or passed directly to `IndexBuilder`. See the [README](../README.md#llm-provider-setup) for the full list and configuration details.
+
 ---
 
 ## Stage 3: Summarize
