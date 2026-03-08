@@ -151,8 +151,9 @@ See [docs/tree-structure.md](docs/tree-structure.md) for the full node format an
 AgentIndex was evaluated against a Hybrid RAG baseline (ChromaDB + BM25/RRF) on 40 human-judged questions across a 450-document noise-rich corpus (Claude Code docs + OpenAI Codex + Python stdlib + Purina dog breeds).
 
 **Key results:**
-- Up to **~13% improvement in completeness** on procedural tasks vs Hybrid RAG
-- Quality **stable across both corpus sizes** — hierarchy shields the agent from haystack growth
+- Up to **~18% improvement in precision and ~19% in recall** on procedural tasks vs Hybrid RAG
+- **1.00 precision** on multi-hop tasks with the Explicit toolset
+- Quality **stable across corpus sizes** — hierarchy shields the agent from haystack growth
 - AgentIndex retrieved **1.17 sources per query** vs **3.9–4.2 for RAG** (mostly noise)
 
 See [evaluation/README.md](evaluation/README.md) for methodology, dataset details, and how to reproduce the experiment.
